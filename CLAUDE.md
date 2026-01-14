@@ -44,6 +44,25 @@ src/
 2. **React Query Hooks** (`hooks/useApartment.ts`): 데이터 페칭/캐싱
 3. **Components**: 훅으로 데이터 조회 후 렌더링
 
+### API Client Pattern (`services/api.ts`)
+
+```typescript
+// 모든 API 응답은 ApiResponse<T> 래퍼 사용
+{ success: boolean, data: T, message?: string, meta?: { total, page, limit } }
+
+// fetchApi 함수가 에러를 자동 throw → React Query가 처리
+// 컴포넌트에서는 isError, error 상태만 확인
+
+// 쿼리 파라미터 패턴
+const params = new URLSearchParams();
+if (options?.filter) params.append('filter', options.filter);
+return fetchApi(`/endpoint?${params}`);
+```
+
+**React Query 훅 규칙**:
+- `queryKey`: `['entity', id, options]` 형식
+- `enabled`: ID 기반은 `!!id`, 검색은 `query.length >= 2`
+
 ### Key Types (`types/apartment.ts`)
 - `Apartment`: 단지 마스터 정보 (44,571건)
 - `Trade`: 매매 실거래가 (10.6M건)
