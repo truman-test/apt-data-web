@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, MapPin, TrendingUp, School, Train, Heart } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,21 +16,22 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/80">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="text-xl font-bold text-blue-600">
             아파트시세
           </Link>
-          <nav className="flex items-center gap-6 text-sm text-gray-600">
-            <Link href="/map" className="hover:text-blue-600">
+          <nav className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <Link href="/map" className="hover:text-blue-600 dark:hover:text-blue-400">
               지도검색
             </Link>
-            <Link href="/favorites" className="flex items-center gap-1 hover:text-blue-600">
+            <Link href="/favorites" className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400">
               <Heart className="h-4 w-4" />
               관심단지
             </Link>
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -37,12 +39,12 @@ export default function Home() {
       {/* Hero Section */}
       <main className="mx-auto max-w-6xl px-4">
         <section className="flex flex-col items-center py-20 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
+          <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl">
             전국 아파트 실거래가
             <br />
-            <span className="text-blue-600">한눈에</span>
+            <span className="text-blue-600 dark:text-blue-400">한눈에</span>
           </h1>
-          <p className="mb-8 text-lg text-gray-600">
+          <p className="mb-8 text-lg text-gray-600 dark:text-gray-400">
             2,200만 건의 실거래가 데이터로 정확한 시세를 확인하세요
           </p>
 
@@ -55,7 +57,7 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="아파트명, 지역명으로 검색하세요"
-                className="h-14 w-full rounded-full border border-gray-200 bg-white pl-12 pr-32 text-lg shadow-lg transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="h-14 w-full rounded-full border border-gray-200 bg-white pl-12 pr-32 text-lg shadow-lg transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-blue-500 dark:focus:ring-blue-800"
               />
               <button
                 type="submit"
@@ -72,7 +74,7 @@ export default function Home() {
               <Link
                 key={region}
                 href={`/search?q=${region}`}
-                className="rounded-full bg-white px-4 py-1.5 text-sm text-gray-600 shadow transition-colors hover:bg-gray-50"
+                className="rounded-full bg-white px-4 py-1.5 text-sm text-gray-600 shadow transition-colors hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 {region}
               </Link>
@@ -106,8 +108,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-gray-50 py-8">
-        <div className="mx-auto max-w-6xl px-4 text-center text-sm text-gray-500">
+      <footer className="border-t border-gray-200 bg-gray-50 py-8 dark:border-gray-800 dark:bg-gray-900">
+        <div className="mx-auto max-w-6xl px-4 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>데이터 출처: 국토교통부 실거래가 공개시스템, K-apt, NEIS</p>
         </div>
       </footer>
@@ -125,10 +127,10 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-      <div className="mb-4 inline-flex rounded-lg bg-blue-100 p-3 text-blue-600">{icon}</div>
-      <h3 className="mb-2 font-semibold text-gray-900">{title}</h3>
-      <p className="text-sm text-gray-600">{description}</p>
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+      <div className="mb-4 inline-flex rounded-lg bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">{icon}</div>
+      <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">{title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
     </div>
   );
 }
