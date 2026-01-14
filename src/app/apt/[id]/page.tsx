@@ -8,6 +8,7 @@ import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
 import { PriceChart } from '@/components/chart/PriceChart';
 import { TradeList } from '@/components/apartment/TradeList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
+import { FavoriteButton } from '@/components/common/FavoriteButton';
 import {
   ApartmentInfoSkeleton,
   NearbyInfoSkeleton,
@@ -90,6 +91,11 @@ export default function ApartmentDetailPage({ params }: PageProps) {
             <h1 className="truncate text-lg font-semibold text-gray-900">{apartment.aptName}</h1>
             <p className="truncate text-sm text-gray-500">{apartment.address}</p>
           </div>
+          <FavoriteButton
+            aptId={aptId}
+            aptName={apartment.aptName}
+            size="lg"
+          />
         </div>
       </header>
 

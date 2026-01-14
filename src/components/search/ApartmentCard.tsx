@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { MapPin, Building2, Calendar } from 'lucide-react';
 import type { Apartment } from '@/types/apartment';
+import { FavoriteButton } from '@/components/common/FavoriteButton';
 
 interface ApartmentCardProps {
   apartment: Apartment;
@@ -42,11 +43,18 @@ export function ApartmentCard({ apartment }: ApartmentCardProps) {
           </div>
         </div>
 
-        {/* 지역 뱃지 */}
+        {/* 지역 뱃지 + 즐겨찾기 */}
         <div className="flex flex-col items-end gap-2">
-          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-            {apartment.sidoName}
-          </span>
+          <div className="flex items-center gap-1">
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+              {apartment.sidoName}
+            </span>
+            <FavoriteButton
+              aptId={apartment.id}
+              aptName={apartment.aptName}
+              size="sm"
+            />
+          </div>
           {apartment.sigunguName && (
             <span className="text-xs text-gray-400">
               {apartment.sigunguName}

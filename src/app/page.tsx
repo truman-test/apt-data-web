@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, TrendingUp, School, Train } from 'lucide-react';
+import { Search, MapPin, TrendingUp, School, Train, Heart } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -22,12 +22,13 @@ export default function Home() {
           <Link href="/" className="text-xl font-bold text-blue-600">
             아파트시세
           </Link>
-          <nav className="flex gap-6 text-sm text-gray-600">
+          <nav className="flex items-center gap-6 text-sm text-gray-600">
             <Link href="/map" className="hover:text-blue-600">
               지도검색
             </Link>
-            <Link href="/ranking" className="hover:text-blue-600">
-              시세랭킹
+            <Link href="/favorites" className="flex items-center gap-1 hover:text-blue-600">
+              <Heart className="h-4 w-4" />
+              관심단지
             </Link>
           </nav>
         </div>
