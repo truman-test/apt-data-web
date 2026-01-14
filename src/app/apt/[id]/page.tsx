@@ -1,153 +1,66 @@
-'use client';
-
-import { use, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { useApartment, useNearestStation, usePriceTrend, useTrades, useAreaTypes } from '@/hooks/useApartment';
-import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
-import { PriceChart } from '@/components/chart/PriceChart';
-import { RentChart } from '@/components/chart/RentChart';
-import { TradeList } from '@/components/apartment/TradeList';
-import { NearbyInfo } from '@/components/apartment/NearbyInfo';
-import { AreaFilter } from '@/components/apartment/AreaFilter';
-import { FavoriteButton } from '@/components/common/FavoriteButton';
-import {
-  ApartmentInfoSkeleton,
-  NearbyInfoSkeleton,
-  PriceChartSkeleton,
-  TradeListSkeleton,
-  Skeleton,
-} from '@/components/skeleton';
+import type { Metadata } from 'next';
+import { prisma } from '@/lib/prisma';
+import { ApartmentDetailContent } from '@/components/apartment/ApartmentDetailContent';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ApartmentDetailPage({ params }: PageProps) {
-  const { id } = use(params);
+// 동적 메타데이터 생성
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
   const aptId = parseInt(id, 10);
-  const [selectedArea, setSelectedArea] = useState<number | null>(null);
 
-  const { data: aptData, isLoading: aptLoading, isError: aptError } = useApartment(aptId);
-  const { data: stationData } = useNearestStation(aptId);
-  const { data: areaTypesData, isLoading: areaTypesLoading } = useAreaTypes(aptId);
-  const { data: trendData, isLoading: trendLoading } = usePriceTrend(aptId, {
-    period: '3y',
-    area: selectedArea || undefined,
-  });
-  const { data: tradesData, isLoading: tradesLoading } = useTrades(aptId, {
-    area: selectedArea || undefined,
-  });
-
-  const apartment = aptData?.data;
-  const station = stationData?.data;
-  const areaTypes = areaTypesData?.data || [];
-  const priceTrend = trendData?.data || [];
-  const trades = tradesData?.data || [];
-
-  // 로딩 상태 - 스켈레톤 UI
-  if (aptLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header Skeleton */}
-        <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
-          <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-            <Skeleton className="h-5 w-5" />
-            <div className="min-w-0 flex-1">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="mt-1 h-4 w-64" />
-            </div>
-          </div>
-        </header>
-
-        {/* Content Skeleton */}
-        <main className="mx-auto max-w-6xl px-4 py-6">
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-1">
-              <ApartmentInfoSkeleton />
-              <NearbyInfoSkeleton />
-            </div>
-            <div className="space-y-6 lg:col-span-2">
-              <PriceChartSkeleton />
-              <TradeListSkeleton />
-            </div>
-          </div>
-        </main>
-      </div>
-    );
+  if (isNaN(aptId)) {
+    return {
+      title: '아파트를 찾을 수 없습니다',
+    };
   }
 
-  // 에러 상태
-  if (aptError || !apartment) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <p className="text-gray-500">아파트 정보를 찾을 수 없습니다</p>
-        <Link href="/" className="text-blue-600 hover:underline">
-          홈으로 돌아가기
-        </Link>
-      </div>
-    );
+  try {
+    const apt = await prisma.apt_master.findUnique({
+      where: { apt_id: aptId },
+      include: { kapt_info: true },
+    });
+
+    if (!apt) {
+      return {
+        title: '아파트를 찾을 수 없습니다',
+      };
+    }
+
+    const address = [apt.sido, apt.sigungu, apt.umd_nm, apt.jibun].filter(Boolean).join(' ');
+    const totalUnits = apt.kapt_info?.total_unit_cnt || apt.kapt_info?.total_ho_cnt || 0;
+    const constructedYear = apt.build_year || 0;
+
+    const description = constructedYear > 0
+      ? `${address} - ${constructedYear}년 준공, ${totalUnits.toLocaleString()}세대. 매매/전월세 실거래가 및 시세 정보.`
+      : `${address} - ${totalUnits.toLocaleString()}세대. 매매/전월세 실거래가 및 시세 정보.`;
+
+    return {
+      title: apt.apt_nm,
+      description,
+      openGraph: {
+        title: `${apt.apt_nm} - 실거래가 및 시세`,
+        description,
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary',
+        title: `${apt.apt_nm} - 실거래가`,
+        description,
+      },
+    };
+  } catch {
+    return {
+      title: '아파트 정보',
+    };
   }
+}
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-          <button onClick={() => window.history.back()} className="text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg font-semibold text-gray-900">{apartment.aptName}</h1>
-            <p className="truncate text-sm text-gray-500">{apartment.address}</p>
-          </div>
-          <FavoriteButton
-            aptId={aptId}
-            aptName={apartment.aptName}
-            size="lg"
-          />
-        </div>
-      </header>
+export default async function ApartmentDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const aptId = parseInt(id, 10);
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* 왼쪽: 기본 정보 + 교통 */}
-          <div className="space-y-6 lg:col-span-1">
-            <ApartmentInfo apartment={apartment} />
-            <NearbyInfo station={station} />
-          </div>
-
-          {/* 오른쪽: 평형 필터 + 시세 차트 + 거래 내역 */}
-          <div className="space-y-6 lg:col-span-2">
-            {/* 평형 필터 */}
-            <div className="rounded-xl border bg-white p-4">
-              <h2 className="mb-3 text-sm font-medium text-gray-700">평형 선택</h2>
-              <AreaFilter
-                areas={areaTypes}
-                selected={selectedArea}
-                onChange={setSelectedArea}
-                isLoading={areaTypesLoading}
-              />
-            </div>
-
-            <PriceChart
-              data={priceTrend}
-              isLoading={trendLoading}
-              aptId={aptId}
-            />
-            <RentChart
-              aptId={aptId}
-              selectedArea={selectedArea}
-            />
-            <TradeList
-              trades={trades}
-              isLoading={tradesLoading}
-              total={tradesData?.meta?.total || 0}
-            />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+  return <ApartmentDetailContent aptId={aptId} />;
 }
