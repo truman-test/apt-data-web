@@ -106,3 +106,11 @@ export interface PriceTrend {
   avgPrice: number;
   transactionCount: number;
 }
+
+// 전월세 추이 데이터 포인트
+export interface RentTrend {
+  date: string;
+  avgDeposit: number;
+  avgMonthlyRent: number;
+  transactionCount: number;
+}

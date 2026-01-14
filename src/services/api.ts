@@ -6,6 +6,7 @@ import type {
   NearestStation,
   ApiResponse,
   PriceTrend,
+  RentTrend,
 } from '@/types/apartment';
 
 // Next.js Route Handlers 사용 (내부 API)
@@ -83,6 +84,18 @@ export async function getPriceTrend(
   if (options?.area) params.append('area', String(options.area));
   if (options?.period) params.append('period', options.period);
   return fetchApi(`/apartments/${aptId}/price-trend?${params}`);
+}
+
+// 전월세 추이
+export async function getRentTrend(
+  aptId: number,
+  options?: { area?: number; period?: '1y' | '3y' | '5y' | 'all'; rentType?: 'jeonse' | 'monthly' }
+): Promise<ApiResponse<RentTrend[]>> {
+  const params = new URLSearchParams();
+  if (options?.area) params.append('area', String(options.area));
+  if (options?.period) params.append('period', options.period);
+  if (options?.rentType) params.append('rentType', options.rentType);
+  return fetchApi(`/apartments/${aptId}/rent-trend?${params}`);
 }
 
 // 최근접 지하철역

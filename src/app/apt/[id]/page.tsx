@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useApartment, useNearestStation, usePriceTrend, useTrades, useAreaTypes } from '@/hooks/useApartment';
 import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
 import { PriceChart } from '@/components/chart/PriceChart';
+import { RentChart } from '@/components/chart/RentChart';
 import { TradeList } from '@/components/apartment/TradeList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
 import { AreaFilter } from '@/components/apartment/AreaFilter';
@@ -134,6 +135,10 @@ export default function ApartmentDetailPage({ params }: PageProps) {
               data={priceTrend}
               isLoading={trendLoading}
               aptId={aptId}
+            />
+            <RentChart
+              aptId={aptId}
+              selectedArea={selectedArea}
             />
             <TradeList
               trades={trades}

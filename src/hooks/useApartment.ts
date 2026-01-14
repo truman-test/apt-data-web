@@ -5,6 +5,7 @@ import {
   getTrades,
   getRents,
   getPriceTrend,
+  getRentTrend,
   getNearestStation,
   searchApartments,
 } from '@/services/api';
@@ -54,6 +55,17 @@ export function usePriceTrend(
   return useQuery({
     queryKey: ['priceTrend', aptId, options],
     queryFn: () => getPriceTrend(aptId, options),
+    enabled: !!aptId,
+  });
+}
+
+export function useRentTrend(
+  aptId: number,
+  options?: { area?: number; period?: '1y' | '3y' | '5y' | 'all'; rentType?: 'jeonse' | 'monthly' }
+) {
+  return useQuery({
+    queryKey: ['rentTrend', aptId, options],
+    queryFn: () => getRentTrend(aptId, options),
     enabled: !!aptId,
   });
 }
