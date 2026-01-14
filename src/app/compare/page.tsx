@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, X, Search } from 'lucide-react';
 import { useApartment, usePriceTrend, useNearestStation, useSearchApartments } from '@/hooks/useApartment';
 import { CompareTable } from '@/components/compare/CompareTable';
 import { ComparePriceChart } from '@/components/compare/ComparePriceChart';
+import { Skeleton, CompareTableSkeleton, ComparePriceChartSkeleton } from '@/components/skeleton';
 import type { Apartment } from '@/types/apartment';
 
 const MAX_COMPARE = 4;
@@ -156,8 +157,9 @@ function CompareContent({ apartmentIds }: { apartmentIds: number[] }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+      <div className="space-y-6">
+        <CompareTableSkeleton columns={apartmentIds.length} />
+        <ComparePriceChartSkeleton columns={apartmentIds.length} />
       </div>
     );
   }
@@ -183,13 +185,21 @@ function ComparePageSkeleton() {
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-          <div className="h-5 w-5 rounded bg-gray-200" />
-          <div className="h-6 w-24 rounded bg-gray-200" />
+          <Skeleton className="h-5 w-5" />
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="ml-auto h-4 w-16" />
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="flex h-64 items-center justify-center rounded-xl border bg-white">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        {/* 슬롯 스켈레톤 */}
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+        {/* 안내 메시지 스켈레톤 */}
+        <div className="rounded-xl border bg-white p-12">
+          <Skeleton className="mx-auto h-5 w-48" />
         </div>
       </main>
     </div>

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useSearchApartments } from '@/hooks/useApartment';
 import { ApartmentCard } from '@/components/search/ApartmentCard';
 import { Pagination } from '@/components/search/Pagination';
+import { ApartmentCardSkeleton } from '@/components/skeleton';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -86,11 +87,17 @@ function SearchContent() {
           </div>
         )}
 
-        {/* 로딩 */}
+        {/* 로딩 스켈레톤 */}
         {query && isLoading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-            <p className="mt-4 text-gray-500">검색 중...</p>
+          <div>
+            <div className="mb-4">
+              <div className="h-5 w-48 animate-pulse rounded bg-gray-200" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <ApartmentCardSkeleton key={i} />
+              ))}
+            </div>
           </div>
         )}
 

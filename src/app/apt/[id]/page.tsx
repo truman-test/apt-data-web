@@ -8,6 +8,13 @@ import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
 import { PriceChart } from '@/components/chart/PriceChart';
 import { TradeList } from '@/components/apartment/TradeList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
+import {
+  ApartmentInfoSkeleton,
+  NearbyInfoSkeleton,
+  PriceChartSkeleton,
+  TradeListSkeleton,
+  Skeleton,
+} from '@/components/skeleton';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -27,11 +34,34 @@ export default function ApartmentDetailPage({ params }: PageProps) {
   const priceTrend = trendData?.data || [];
   const trades = tradesData?.data || [];
 
-  // 로딩 상태
+  // 로딩 상태 - 스켈레톤 UI
   if (aptLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Skeleton */}
+        <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+          <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
+            <Skeleton className="h-5 w-5" />
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="mt-1 h-4 w-64" />
+            </div>
+          </div>
+        </header>
+
+        {/* Content Skeleton */}
+        <main className="mx-auto max-w-6xl px-4 py-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-1">
+              <ApartmentInfoSkeleton />
+              <NearbyInfoSkeleton />
+            </div>
+            <div className="space-y-6 lg:col-span-2">
+              <PriceChartSkeleton />
+              <TradeListSkeleton />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
