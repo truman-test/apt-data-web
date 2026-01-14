@@ -1,7 +1,7 @@
 # apt-data-web Context
 
 **최종 업데이트**: 2026-01-14
-**MVP 상태**: 개발 초기 단계
+**MVP 상태**: MVP 완료
 
 ---
 
@@ -66,23 +66,29 @@
 - [x] React Query 훅
 
 ### 진행 예정
-- [ ] Backend API (FastAPI)
-- [ ] /search 검색 결과 페이지
-- [ ] /apt/[id] 단지 상세 페이지
-- [ ] /map 지도 탐색 페이지
-- [ ] /compare 비교 페이지
+- [x] Backend API (Next.js Route Handlers, 읽기 전용) ✅ 완료
+- [x] /search 검색 결과 페이지 ✅ 완료
+- [x] /apt/[id] 단지 상세 페이지 ✅ 완료
+- [x] /map 지도 탐색 페이지 ✅ 완료
+- [x] /compare 비교 페이지 ✅ 완료
 
 ---
 
 ## 알려진 제약사항
 
+### ⚠️ DB 읽기 전용 원칙 (최우선)
+- `apt-data-collector-v2` 프로젝트가 데이터 수집/관리 담당
+- 이 프로젝트는 **SELECT 쿼리만** 허용
+- **INSERT, UPDATE, DELETE, DROP 절대 금지**
+- DB 사용자 계정도 읽기 전용 권한만 부여
+
 ### 네이버 지도 API
 - 무료 플랜: 일 10만 건 호출 제한
 - Client ID 환경변수 필수: `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`
 
-### 백엔드 의존성
-- 로컬 개발: 백엔드 서버 `localhost:8000` 실행 필요
-- CORS: 백엔드에서 프론트엔드 도메인 허용 필요
+### PostgreSQL 연결
+- 로컬 개발: `DATABASE_URL` 환경변수 필수
+- DB 사용자 권한: SELECT만 허용된 읽기 전용 계정 사용 권장
 
 ### 데이터 범위
 - 매매: 2006년 ~ 현재

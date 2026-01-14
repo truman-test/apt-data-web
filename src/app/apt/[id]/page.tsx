@@ -1,0 +1,92 @@
+'use client';
+
+import { use } from 'react';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { useApartment, useNearestStation, usePriceTrend, useTrades } from '@/hooks/useApartment';
+import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
+import { PriceChart } from '@/components/chart/PriceChart';
+import { TradeList } from '@/components/apartment/TradeList';
+import { NearbyInfo } from '@/components/apartment/NearbyInfo';
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function ApartmentDetailPage({ params }: PageProps) {
+  const { id } = use(params);
+  const aptId = parseInt(id, 10);
+
+  const { data: aptData, isLoading: aptLoading, isError: aptError } = useApartment(aptId);
+  const { data: stationData } = useNearestStation(aptId);
+  const { data: trendData, isLoading: trendLoading } = usePriceTrend(aptId, { period: '3y' });
+  const { data: tradesData, isLoading: tradesLoading } = useTrades(aptId, {});
+
+  const apartment = aptData?.data;
+  const station = stationData?.data;
+  const priceTrend = trendData?.data || [];
+  const trades = tradesData?.data || [];
+
+  // 로딩 상태
+  if (aptLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      </div>
+    );
+  }
+
+  // 에러 상태
+  if (aptError || !apartment) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <p className="text-gray-500">아파트 정보를 찾을 수 없습니다</p>
+        <Link href="/" className="text-blue-600 hover:underline">
+          홈으로 돌아가기
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
+          <button onClick={() => window.history.back()} className="text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-lg font-semibold text-gray-900">{apartment.aptName}</h1>
+            <p className="truncate text-sm text-gray-500">{apartment.address}</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* 왼쪽: 기본 정보 + 교통 */}
+          <div className="space-y-6 lg:col-span-1">
+            <ApartmentInfo apartment={apartment} />
+            <NearbyInfo station={station} />
+          </div>
+
+          {/* 오른쪽: 시세 차트 + 거래 내역 */}
+          <div className="space-y-6 lg:col-span-2">
+            <PriceChart
+              data={priceTrend}
+              isLoading={trendLoading}
+              aptId={aptId}
+            />
+            <TradeList
+              trades={trades}
+              isLoading={tradesLoading}
+              total={tradesData?.meta?.total || 0}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

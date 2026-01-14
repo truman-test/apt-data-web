@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-한국 아파트 실거래가 데이터 기반 부동산 정보 서비스 프론트엔드. apt-data-collector-v2 프로젝트에서 수집한 PostgreSQL 데이터를 활용.
+한국 아파트 실거래가 데이터 기반 부동산 정보 서비스 (프론트엔드 + 백엔드 API).
+- `apt-data-collector-v2` 프로젝트에서 수집한 PostgreSQL 데이터 활용
+- **DB 읽기 전용**: SELECT만 허용, INSERT/UPDATE/DELETE 절대 금지
 
 ## Commands
 
@@ -18,6 +20,8 @@ npm run lint     # ESLint 실행
 
 ### Tech Stack
 - **Framework**: Next.js 16 (App Router)
+- **Backend API**: Next.js Route Handlers (`app/api/`)
+- **Database**: PostgreSQL (읽기 전용)
 - **State**: React Query (서버 상태) + Zustand (클라이언트 상태)
 - **Map**: Naver Maps API
 - **Chart**: Recharts
@@ -26,7 +30,10 @@ npm run lint     # ESLint 실행
 ### Directory Structure
 ```
 src/
-├── app/              # Next.js App Router 페이지
+├── app/
+│   ├── api/          # Backend API Route Handlers (읽기 전용)
+│   └── ...           # 페이지 라우트
+├── lib/              # DB 클라이언트, 유틸리티
 ├── components/
 │   ├── common/       # QueryProvider 등 공통 컴포넌트
 │   ├── map/          # NaverMap, MapProvider
@@ -40,9 +47,10 @@ src/
 ```
 
 ### Data Flow
-1. **API Client** (`services/api.ts`): 백엔드 FastAPI 서버와 통신
-2. **React Query Hooks** (`hooks/useApartment.ts`): 데이터 페칭/캐싱
-3. **Components**: 훅으로 데이터 조회 후 렌더링
+1. **Route Handlers** (`app/api/`): PostgreSQL에서 데이터 조회 (SELECT only)
+2. **API Client** (`services/api.ts`): Route Handlers와 통신
+3. **React Query Hooks** (`hooks/useApartment.ts`): 데이터 페칭/캐싱
+4. **Components**: 훅으로 데이터 조회 후 렌더링
 
 ### API Client Pattern (`services/api.ts`)
 
@@ -102,6 +110,14 @@ GET /apartments/:id/rents       # 전월세 실거래가
 GET /apartments/:id/price-trend # 가격 추이
 GET /apartments/by-bounds       # 지도 영역 내 단지
 ```
+
+## Critical Constraints (중요 제약사항)
+
+**⚠️ DB 읽기 전용 원칙**
+- `apt-data-collector-v2`가 데이터 수집/관리 담당
+- 이 프로젝트는 **SELECT 쿼리만** 사용
+- INSERT, UPDATE, DELETE, DROP 등 **절대 금지**
+- DB 사용자 권한도 읽기 전용으로 설정 권장
 
 ## Notes
 

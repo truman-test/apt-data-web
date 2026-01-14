@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 아파트 단지 마스터 (44,571건)
+model apt_master {
+  apt_id           Int       @id @default(autoincrement())
+  sigungu_cd       String    @db.VarChar(5)
+  umd_nm           String    @db.VarChar(50)
+  apt_nm           String    @db.VarChar(100)
+  build_year       Int?
+  sido             String?   @db.VarChar(20)
+  sigungu          String?   @db.VarChar(20)
+  search_name      String?   @db.VarChar(150)
+  jibun            String?   @db.VarChar(20)
+  road_nm          String?   @db.VarChar(50)
+  road_nm_bonbun   String?   @db.VarChar(10)
+  road_nm_bubun    String?   @db.VarChar(10)
+  min_area         Decimal?  @db.Decimal(10, 2)
+  max_area         Decimal?  @db.Decimal(10, 2)
+  area_types       Int?
+  kapt_code        String?   @db.VarChar(20)
+  kapt_name        String?   @db.VarChar(100)
+  match_score      Int?
+  match_method     String?   @db.VarChar(20)
+  trade_count      Int?      @default(0)
+  rent_count       Int?      @default(0)
+  first_trade_date DateTime? @db.Date
+  last_trade_date  DateTime? @db.Date
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  lat              Decimal?  @db.Decimal(10, 7)
+  lng              Decimal?  @db.Decimal(10, 7)
+
+  // Relations
+  nearest_station apt_nearest_station?
+  kapt_info       raw_kapt_info?        @relation(fields: [kapt_code], references: [kapt_code])
+
+  @@unique([sigungu_cd, umd_nm, apt_nm, build_year], map: "uq_apt_master_identity")
+  @@index([apt_nm], map: "idx_apt_master_apt_nm")
+  @@index([build_year], map: "idx_apt_master_build_year")
+  @@index([kapt_code], map: "idx_apt_master_kapt_code")
+  @@index([search_name], map: "idx_apt_master_search")
+  @@index([sigungu_cd], map: "idx_apt_master_sigungu")
+  @@index([lat, lng], map: "idx_apt_master_coordinates")
+}
+
+// 최근접 지하철역
+model apt_nearest_station {
+  apt_id       Int      @id
+  station_id   Int?
+  station_name String?  @db.VarChar(50)
+  line_name    String?  @db.VarChar(50)
+  region       String?  @db.VarChar(20)
+  distance_m   Decimal? @db.Decimal
+
+  apartment apt_master @relation(fields: [apt_id], references: [apt_id])
+
+  @@index([apt_id], map: "idx_apt_nearest_station_apt_id")
+  @@index([distance_m], map: "idx_apt_nearest_station_distance")
+}
+
+// 매매 실거래가 (10.6M건)
+model raw_trades {
+  id           BigInt    @id @default(autoincrement())
+  sigungu_cd   String    @db.VarChar(5)
+  umd_nm       String?   @db.VarChar(50)
+  apt_nm       String?   @db.VarChar(100)
+  jibun        String?   @db.VarChar(20)
+  exclu_use_ar Decimal?  @db.Decimal(10, 4)
+  deal_year    Int
+  deal_month   Int
+  deal_day     Int?
+  deal_amount  BigInt?
+  floor        Int?
+  build_year   Int?
+  collected_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([sigungu_cd, apt_nm], map: "idx_raw_trades_sigungu_apt")
+  @@index([apt_nm], map: "idx_raw_trades_apt_nm")
+  @@index([deal_year, deal_month], map: "idx_raw_trades_deal_ym")
+  @@index([sigungu_cd], map: "idx_raw_trades_sigungu")
+}
+
+// 전월세 실거래가 (11.8M건)
+model raw_rents {
+  id           BigInt    @id @default(autoincrement())
+  sigungu_cd   String    @db.VarChar(5)
+  umd_nm       String?   @db.VarChar(50)
+  apt_nm       String?   @db.VarChar(100)
+  jibun        String?   @db.VarChar(20)
+  exclu_use_ar Decimal?  @db.Decimal(10, 4)
+  deal_year    Int
+  deal_month   Int
+  deal_day     Int?
+  deposit      BigInt?
+  monthly_rent BigInt?
+  floor        Int?
+  build_year   Int?
+  collected_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([sigungu_cd, apt_nm], map: "idx_raw_rents_sigungu_apt")
+  @@index([apt_nm], map: "idx_raw_rents_apt_nm")
+  @@index([deal_year, deal_month], map: "idx_raw_rents_deal_ym")
+  @@index([sigungu_cd], map: "idx_raw_rents_sigungu")
+}
+
+// K-apt 기본정보 (세대수, 동수 등)
+model raw_kapt_info {
+  id             Int          @id @default(autoincrement())
+  kapt_code      String       @unique @db.VarChar(20)
+  kapt_name      String?      @db.VarChar(100)
+  do_nm          String?      @db.VarChar(20)
+  sigungu_nm     String?      @db.VarChar(30)
+  umd_nm         String?      @db.VarChar(50)
+  jibun          String?      @db.VarChar(20)
+  road_nm_addr   String?      @db.VarChar(200)
+  build_year     Int?
+  total_dong_cnt Int?
+  total_ho_cnt   Int?
+  total_unit_cnt Int?
+  collected_at   DateTime?    @default(now()) @db.Timestamptz(6)
+
+  apartments apt_master[]
+
+  @@index([kapt_name], map: "idx_raw_kapt_info_name")
+  @@index([sigungu_nm], map: "idx_raw_kapt_info_sigungu")
+}
+
+// 학교 정보 (12,610건)
+model raw_schools {
+  id          Int      @id @default(autoincrement())
+  school_code String   @unique(map: "uq_schools_code") @db.VarChar(20)
+  school_name String   @db.VarChar(100)
+  school_type String?  @db.VarChar(20)
+  sigungu_cd  String?  @db.VarChar(5)
+  address     String?
+  lat         Decimal? @db.Decimal(10, 7)
+  lng         Decimal? @db.Decimal(10, 7)
+
+  @@index([lat, lng], map: "idx_schools_coordinates")
+  @@index([sigungu_cd], map: "idx_schools_sigungu")
+  @@index([school_type], map: "idx_schools_type")
+}

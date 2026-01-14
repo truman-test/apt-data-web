@@ -8,7 +8,8 @@ import type {
   PriceTrend,
 } from '@/types/apartment';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// Next.js Route Handlers 사용 (내부 API)
+const API_URL = '/api';
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
