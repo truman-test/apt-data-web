@@ -1,13 +1,14 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { useApartment, useNearestStation, usePriceTrend, useTrades } from '@/hooks/useApartment';
+import { useApartment, useNearestStation, usePriceTrend, useTrades, useAreaTypes } from '@/hooks/useApartment';
 import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
 import { PriceChart } from '@/components/chart/PriceChart';
 import { TradeList } from '@/components/apartment/TradeList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
+import { AreaFilter } from '@/components/apartment/AreaFilter';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
 import {
   ApartmentInfoSkeleton,
@@ -24,14 +25,22 @@ interface PageProps {
 export default function ApartmentDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const aptId = parseInt(id, 10);
+  const [selectedArea, setSelectedArea] = useState<number | null>(null);
 
   const { data: aptData, isLoading: aptLoading, isError: aptError } = useApartment(aptId);
   const { data: stationData } = useNearestStation(aptId);
-  const { data: trendData, isLoading: trendLoading } = usePriceTrend(aptId, { period: '3y' });
-  const { data: tradesData, isLoading: tradesLoading } = useTrades(aptId, {});
+  const { data: areaTypesData, isLoading: areaTypesLoading } = useAreaTypes(aptId);
+  const { data: trendData, isLoading: trendLoading } = usePriceTrend(aptId, {
+    period: '3y',
+    area: selectedArea || undefined,
+  });
+  const { data: tradesData, isLoading: tradesLoading } = useTrades(aptId, {
+    area: selectedArea || undefined,
+  });
 
   const apartment = aptData?.data;
   const station = stationData?.data;
+  const areaTypes = areaTypesData?.data || [];
   const priceTrend = trendData?.data || [];
   const trades = tradesData?.data || [];
 
@@ -108,8 +117,19 @@ export default function ApartmentDetailPage({ params }: PageProps) {
             <NearbyInfo station={station} />
           </div>
 
-          {/* 오른쪽: 시세 차트 + 거래 내역 */}
+          {/* 오른쪽: 평형 필터 + 시세 차트 + 거래 내역 */}
           <div className="space-y-6 lg:col-span-2">
+            {/* 평형 필터 */}
+            <div className="rounded-xl border bg-white p-4">
+              <h2 className="mb-3 text-sm font-medium text-gray-700">평형 선택</h2>
+              <AreaFilter
+                areas={areaTypes}
+                selected={selectedArea}
+                onChange={setSelectedArea}
+                isLoading={areaTypesLoading}
+              />
+            </div>
+
             <PriceChart
               data={priceTrend}
               isLoading={trendLoading}
