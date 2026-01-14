@@ -8,6 +8,7 @@ import { useApartment, usePriceTrend, useNearestStation, useSearchApartments } f
 import { CompareTable } from '@/components/compare/CompareTable';
 import { ComparePriceChart } from '@/components/compare/ComparePriceChart';
 import { Skeleton, CompareTableSkeleton, ComparePriceChartSkeleton } from '@/components/skeleton';
+import { useToastStore } from '@/stores/toastStore';
 import type { Apartment } from '@/types/apartment';
 
 const MAX_COMPARE = 4;
@@ -212,6 +213,7 @@ function ComparePageContent() {
   const searchParams = useSearchParams();
   const [apartmentIds, setApartmentIds] = useState<number[]>([]);
   const [showSearch, setShowSearch] = useState(false);
+  const addToast = useToastStore((state) => state.addToast);
 
   // URL에서 ID 파싱
   useEffect(() => {
@@ -233,11 +235,18 @@ function ComparePageContent() {
 
   // 아파트 추가
   const addApartment = (apt: Apartment) => {
-    if (apartmentIds.length < MAX_COMPARE && !apartmentIds.includes(apt.id)) {
-      const newIds = [...apartmentIds, apt.id];
-      setApartmentIds(newIds);
-      updateUrl(newIds);
+    if (apartmentIds.length >= MAX_COMPARE) {
+      addToast(`최대 ${MAX_COMPARE}개까지만 비교할 수 있습니다`, 'warning');
+      return;
     }
+    if (apartmentIds.includes(apt.id)) {
+      addToast('이미 추가된 아파트입니다', 'warning');
+      return;
+    }
+    const newIds = [...apartmentIds, apt.id];
+    setApartmentIds(newIds);
+    updateUrl(newIds);
+    addToast(`${apt.aptName}이(가) 비교 목록에 추가되었습니다`, 'success');
   };
 
   // 아파트 제거
@@ -245,6 +254,7 @@ function ComparePageContent() {
     const newIds = apartmentIds.filter((aptId) => aptId !== id);
     setApartmentIds(newIds);
     updateUrl(newIds);
+    addToast('아파트가 비교 목록에서 제거되었습니다', 'info');
   };
 
   return (
