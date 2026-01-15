@@ -2,7 +2,7 @@ import { Skeleton } from './Skeleton';
 
 export function ApartmentInfoSkeleton() {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {/* 헤더 */}
       <Skeleton className="mb-4 h-6 w-24" />
 
@@ -20,7 +20,7 @@ export function ApartmentInfoSkeleton() {
       </div>
 
       {/* 지역 태그 */}
-      <div className="mt-4 flex gap-2 border-t pt-4">
+      <div className="mt-4 flex gap-2 border-t border-gray-200 pt-4 dark:border-gray-700">
         <Skeleton className="h-6 w-12 rounded-full" />
         <Skeleton className="h-6 w-16 rounded-full" />
         <Skeleton className="h-6 w-14 rounded-full" />

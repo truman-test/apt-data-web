@@ -34,16 +34,16 @@ export default function FavoritesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="text-gray-600 hover:text-gray-900">
+          <Link href="/" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-lg font-semibold">관심 단지</h1>
+          <h1 className="text-lg font-semibold dark:text-white">관심 단지</h1>
           {mounted && favorites.length > 0 && (
-            <span className="ml-auto text-sm text-gray-500">
+            <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
               {favorites.length}개
             </span>
           )}
@@ -60,9 +60,9 @@ export default function FavoritesPage() {
           </div>
         ) : favorites.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Heart className="mb-4 h-12 w-12 text-gray-300" />
-            <p className="text-gray-500">관심 단지가 없습니다</p>
-            <p className="mt-1 text-sm text-gray-400">
+            <Heart className="mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
+            <p className="text-gray-500 dark:text-gray-400">관심 단지가 없습니다</p>
+            <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
               마음에 드는 아파트에 하트를 눌러 저장하세요
             </p>
             <Link

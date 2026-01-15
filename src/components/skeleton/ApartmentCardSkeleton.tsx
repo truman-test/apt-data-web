@@ -2,7 +2,7 @@ import { Skeleton } from './Skeleton';
 
 export function ApartmentCardSkeleton() {
   return (
-    <div className="rounded-xl border bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex justify-between gap-4">
         <div className="min-w-0 flex-1">
           {/* 단지명 */}

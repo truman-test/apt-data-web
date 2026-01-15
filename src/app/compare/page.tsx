@@ -32,10 +32,10 @@ function SearchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">아파트 검색</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h3 className="text-lg font-semibold dark:text-white">아파트 검색</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -47,7 +47,7 @@ function SearchModal({
             placeholder="아파트명 검색 (2글자 이상)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
             autoFocus
           />
         </div>
@@ -58,9 +58,9 @@ function SearchModal({
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
             </div>
           ) : query.length < 2 ? (
-            <p className="py-8 text-center text-gray-500">2글자 이상 입력해주세요</p>
+            <p className="py-8 text-center text-gray-500 dark:text-gray-400">2글자 이상 입력해주세요</p>
           ) : filteredResults.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">검색 결과가 없습니다</p>
+            <p className="py-8 text-center text-gray-500 dark:text-gray-400">검색 결과가 없습니다</p>
           ) : (
             <div className="space-y-2">
               {filteredResults.map((apt) => (
@@ -70,10 +70,10 @@ function SearchModal({
                     onSelect(apt);
                     onClose();
                   }}
-                  className="w-full rounded-lg border p-3 text-left transition-colors hover:bg-gray-50"
+                  className="w-full rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                 >
-                  <p className="font-medium text-gray-900">{apt.aptName}</p>
-                  <p className="mt-0.5 text-sm text-gray-500">{apt.address}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{apt.aptName}</p>
+                  <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{apt.address}</p>
                 </button>
               ))}
             </div>
@@ -100,7 +100,7 @@ function ApartmentSlot({
     return (
       <button
         onClick={onAdd}
-        className="flex h-24 w-full items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-blue-400 hover:text-blue-500"
+        className="flex h-24 w-full items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-blue-400 hover:text-blue-500 dark:border-gray-600 dark:hover:border-blue-500"
       >
         <Plus className="mr-2 h-5 w-5" />
         아파트 추가
@@ -109,15 +109,15 @@ function ApartmentSlot({
   }
 
   return (
-    <div className="relative rounded-xl border bg-white p-4 shadow-sm">
+    <div className="relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <button
         onClick={onRemove}
-        className="absolute right-2 top-2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+        className="absolute right-2 top-2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
       >
         <X className="h-4 w-4" />
       </button>
-      <h3 className="pr-6 font-semibold text-gray-900">{apartment?.aptName}</h3>
-      <p className="mt-1 text-sm text-gray-500">{apartment?.address}</p>
+      <h3 className="pr-6 font-semibold text-gray-900 dark:text-white">{apartment?.aptName}</h3>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{apartment?.address}</p>
     </div>
   );
 }
@@ -183,8 +183,8 @@ function CompareContent({ apartmentIds }: { apartmentIds: number[] }) {
 // 로딩 폴백
 function ComparePageSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
           <Skeleton className="h-5 w-5" />
           <Skeleton className="h-6 w-24" />
@@ -199,7 +199,7 @@ function ComparePageSkeleton() {
           ))}
         </div>
         {/* 안내 메시지 스켈레톤 */}
-        <div className="rounded-xl border bg-white p-12">
+        <div className="rounded-xl border border-gray-200 bg-white p-12 dark:border-gray-700 dark:bg-gray-800">
           <Skeleton className="mx-auto h-5 w-48" />
         </div>
       </main>
@@ -258,15 +258,15 @@ function ComparePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="text-gray-600 hover:text-gray-900">
+          <Link href="/" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-lg font-semibold">아파트 비교</h1>
-          <span className="ml-auto text-sm text-gray-500">
+          <h1 className="text-lg font-semibold dark:text-white">아파트 비교</h1>
+          <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
             {apartmentIds.length}/{MAX_COMPARE}개 선택
           </span>
         </div>
@@ -289,8 +289,8 @@ function ComparePageContent() {
         {apartmentIds.length >= 2 ? (
           <CompareContent apartmentIds={apartmentIds} />
         ) : (
-          <div className="rounded-xl border bg-white p-12 text-center">
-            <p className="text-gray-500">
+          <div className="rounded-xl border border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-gray-800">
+            <p className="text-gray-500 dark:text-gray-400">
               비교할 아파트를 2개 이상 선택해주세요
             </p>
           </div>

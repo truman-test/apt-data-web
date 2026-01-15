@@ -62,9 +62,9 @@ export function ComparePriceChart({ apartments, trends }: ComparePriceChartProps
 
   if (mergedData.length === 0) {
     return (
-      <div className="rounded-xl border bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">시세 비교</h2>
-        <div className="flex h-64 items-center justify-center text-gray-500">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">시세 비교</h2>
+        <div className="flex h-64 items-center justify-center text-gray-500 dark:text-gray-400">
           거래 데이터가 없습니다
         </div>
       </div>
@@ -72,24 +72,24 @@ export function ComparePriceChart({ apartments, trends }: ComparePriceChartProps
   }
 
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">시세 비교 (최근 3년)</h2>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">시세 비교 (최근 3년)</h2>
 
       {/* 최신 가격 요약 */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {apartments.map((apt, index) => (
-          <div key={apt.id} className="rounded-lg bg-gray-50 p-3">
+          <div key={apt.id} className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
             <div className="flex items-center gap-2">
               <div
                 className="h-3 w-3 rounded-full"
                 style={{ backgroundColor: COLORS[index] }}
               />
-              <span className="text-sm font-medium text-gray-700 truncate">
+              <span className="text-sm font-medium text-gray-700 truncate dark:text-gray-300">
                 {apt.aptName}
               </span>
             </div>
             <div className="mt-2">
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
                 {formatPrice(latestPrices[index].current)}
               </span>
               {latestPrices[index].change !== 0 && (
@@ -113,12 +113,12 @@ export function ComparePriceChart({ apartments, trends }: ComparePriceChartProps
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={mergedData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 11, fill: '#9ca3af' }}
               tickLine={false}
-              axisLine={{ stroke: '#e5e7eb' }}
+              axisLine={{ stroke: '#4b5563' }}
               tickFormatter={(value) => {
                 const [year, month] = value.split('-');
                 return `${year.slice(2)}.${month}`;
@@ -135,8 +135,8 @@ export function ComparePriceChart({ apartments, trends }: ComparePriceChartProps
               content={({ active, payload, label }) => {
                 if (!active || !payload?.length) return null;
                 return (
-                  <div className="rounded-lg border bg-white px-3 py-2 shadow-lg">
-                    <p className="mb-1 text-xs text-gray-500">{label}</p>
+                  <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                    <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">{label}</p>
                     {payload.map((entry, index) => (
                       <p
                         key={index}

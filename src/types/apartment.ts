@@ -114,3 +114,13 @@ export interface RentTrend {
   avgMonthlyRent: number;
   transactionCount: number;
 }
+
+// 자동완성 아이템
+export interface AutocompleteItem {
+  id: number;
+  aptName: string;
+  dongName: string;
+  displayName: string; // "동이름 아파트명" 형식
+  sidoName: string;
+  sigunguName: string;
+}

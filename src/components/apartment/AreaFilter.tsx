@@ -17,7 +17,7 @@ export function AreaFilter({ areas, selected, onChange, isLoading }: AreaFilterP
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="h-8 w-16 animate-pulse rounded-full bg-gray-200"
+            className="h-8 w-16 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700"
           />
         ))}
       </div>
@@ -36,7 +36,7 @@ export function AreaFilter({ areas, selected, onChange, isLoading }: AreaFilterP
           'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
           selected === null
             ? 'bg-blue-600 text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
         )}
       >
         전체
@@ -49,7 +49,7 @@ export function AreaFilter({ areas, selected, onChange, isLoading }: AreaFilterP
             'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
             selected !== null && Math.abs(selected - area.exclusiveArea) < 1
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
           )}
         >
           {area.pyeong}평

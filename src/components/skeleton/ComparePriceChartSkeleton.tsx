@@ -2,14 +2,14 @@ import { Skeleton } from './Skeleton';
 
 export function ComparePriceChartSkeleton({ columns = 2 }: { columns?: number }) {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {/* 헤더 */}
       <Skeleton className="mb-4 h-6 w-40" />
 
       {/* 가격 요약 카드 */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {Array.from({ length: columns }).map((_, i) => (
-          <div key={i} className="rounded-lg bg-gray-50 p-3">
+          <div key={i} className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
             <div className="flex items-center gap-2">
               <Skeleton className="h-3 w-3 rounded-full" />
               <Skeleton className="h-4 w-20" />

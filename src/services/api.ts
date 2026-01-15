@@ -7,6 +7,7 @@ import type {
   ApiResponse,
   PriceTrend,
   RentTrend,
+  AutocompleteItem,
 } from '@/types/apartment';
 
 // Next.js Route Handlers 사용 (내부 API)
@@ -115,4 +116,10 @@ export async function getApartmentsByBounds(bounds: {
     neLng: String(bounds.ne.lng),
   });
   return fetchApi(`/apartments/by-bounds?${params}`);
+}
+
+// 자동완성 검색
+export async function getAutocomplete(query: string): Promise<ApiResponse<AutocompleteItem[]>> {
+  const params = new URLSearchParams({ q: query });
+  return fetchApi(`/apartments/autocomplete?${params}`);
 }

@@ -8,6 +8,7 @@ import {
   getRentTrend,
   getNearestStation,
   searchApartments,
+  getAutocomplete,
 } from '@/services/api';
 
 export function useApartment(id: number) {
@@ -83,5 +84,14 @@ export function useSearchApartments(query: string, options?: { page?: number; li
     queryKey: ['searchApartments', query, options],
     queryFn: () => searchApartments(query, options),
     enabled: query.length >= 2,
+  });
+}
+
+export function useAutocomplete(query: string) {
+  return useQuery({
+    queryKey: ['autocomplete', query],
+    queryFn: () => getAutocomplete(query),
+    enabled: query.length >= 1,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
   });
 }

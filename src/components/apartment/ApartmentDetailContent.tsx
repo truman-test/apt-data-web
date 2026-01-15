@@ -46,9 +46,9 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
   // 로딩 상태 - 스켈레톤 UI
   if (aptLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         {/* Header Skeleton */}
-        <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
             <Skeleton className="h-5 w-5" />
             <div className="min-w-0 flex-1">
@@ -78,9 +78,9 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
   // 에러 상태
   if (aptError || !apartment) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <p className="text-gray-500">아파트 정보를 찾을 수 없습니다</p>
-        <Link href="/" className="text-blue-600 hover:underline">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-gray-950">
+        <p className="text-gray-500 dark:text-gray-400">아파트 정보를 찾을 수 없습니다</p>
+        <Link href="/" className="text-blue-600 hover:underline dark:text-blue-400">
           홈으로 돌아가기
         </Link>
       </div>
@@ -88,16 +88,16 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-          <button onClick={() => window.history.back()} className="text-gray-600 hover:text-gray-900">
+          <button onClick={() => window.history.back()} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg font-semibold text-gray-900">{apartment.aptName}</h1>
-            <p className="truncate text-sm text-gray-500">{apartment.address}</p>
+            <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">{apartment.aptName}</h1>
+            <p className="truncate text-sm text-gray-500 dark:text-gray-400">{apartment.address}</p>
           </div>
           <FavoriteButton
             aptId={aptId}
@@ -119,8 +119,8 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
           {/* 오른쪽: 평형 필터 + 시세 차트 + 거래 내역 */}
           <div className="space-y-6 lg:col-span-2">
             {/* 평형 필터 */}
-            <div className="rounded-xl border bg-white p-4">
-              <h2 className="mb-3 text-sm font-medium text-gray-700">평형 선택</h2>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <h2 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">평형 선택</h2>
               <AreaFilter
                 areas={areaTypes}
                 selected={selectedArea}
@@ -133,6 +133,7 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
               data={priceTrend}
               isLoading={trendLoading}
               aptId={aptId}
+              selectedArea={selectedArea}
             />
             <RentChart
               aptId={aptId}

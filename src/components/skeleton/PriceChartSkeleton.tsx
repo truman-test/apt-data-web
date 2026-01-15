@@ -2,7 +2,7 @@ import { Skeleton } from './Skeleton';
 
 export function PriceChartSkeleton() {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {/* 헤더 */}
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -23,12 +23,12 @@ export function PriceChartSkeleton() {
 
       {/* 차트 영역 */}
       <div className="h-64 flex items-end justify-between gap-1 pt-4">
-        {/* 차트 바 시뮬레이션 */}
-        {Array.from({ length: 12 }).map((_, i) => (
+        {/* 차트 바 시뮬레이션 - 고정 높이 사용 (hydration 에러 방지) */}
+        {[65, 45, 70, 55, 80, 60, 75, 50, 85, 40, 72, 58].map((height, i) => (
           <Skeleton
             key={i}
             className="flex-1 rounded-t"
-            style={{ height: `${30 + Math.random() * 60}%` }}
+            style={{ height: `${height}%` }}
           />
         ))}
       </div>

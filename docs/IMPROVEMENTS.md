@@ -1083,6 +1083,132 @@ export default function robots(): MetadataRoute.Robots {
 
 ---
 
+## 7. UI 연구 기반 개선사항 (2026-01-15 추가)
+
+UI 딥리서치를 통해 도출된 추가 개선사항
+
+### 7.1 가격 변동 컬러 코딩
+
+**현재 상태**: 가격만 숫자로 표시
+**개선 목표**: 상승/하락을 색상으로 직관적 표시
+
+**적용 위치**:
+- 검색 결과 카드 (전월 대비 변동)
+- 단지 상세 페이지 시세 정보
+- 거래 내역 테이블
+
+**구현 방식**:
+```tsx
+// 가격 변동 표시 유틸리티
+function PriceChange({ current, previous }: { current: number; previous: number }) {
+  const diff = current - previous;
+  const percent = ((diff / previous) * 100).toFixed(1);
+
+  if (diff > 0) {
+    return <span className="text-red-500">▲ {percent}%</span>;
+  } else if (diff < 0) {
+    return <span className="text-blue-500">▼ {Math.abs(parseFloat(percent))}%</span>;
+  }
+  return <span className="text-gray-500">-</span>;
+}
+```
+
+---
+
+### 7.2 스켈레톤 로딩 개선
+
+**우선순위**: 높음 (체감 성능 향상)
+
+기존 1.1절 참조. 추가 고려사항:
+- Tailwind `animate-pulse` 사용
+- 실제 컨텐츠 레이아웃과 동일한 구조
+- 다크 모드 대응 (`dark:bg-gray-700`)
+
+---
+
+### 7.3 마이크로 애니메이션
+
+**현재 상태**: 기본 transition만 적용
+**개선 목표**: 인터랙션 피드백 강화
+
+**적용 위치**:
+1. 버튼 클릭 (scale 효과)
+2. 카드 호버 (그림자 + 살짝 위로)
+3. 페이지 전환 (fade-in)
+4. 리스트 아이템 (stagger 애니메이션)
+
+**구현 예시**:
+```css
+/* 버튼 클릭 피드백 */
+.btn-press {
+  @apply transition-transform active:scale-95;
+}
+
+/* 카드 호버 */
+.card-hover {
+  @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
+}
+```
+
+---
+
+### 7.4 고급 필터 UI
+
+**현재 상태**: 평형 필터만 존재
+**개선 목표**: 가격, 연도 등 다중 필터
+
+**추가 필터 항목**:
+- 가격 범위 슬라이더 (최소~최대)
+- 준공 연도 필터
+- 세대수 범위
+
+**구현 파일**:
+```
+src/components/search/
+├── FilterPanel.tsx        # 전체 필터 패널
+├── PriceRangeSlider.tsx   # 가격 범위
+├── YearFilter.tsx         # 준공 연도
+└── UnitCountFilter.tsx    # 세대수
+```
+
+---
+
+### 7.5 검색 결과 카드 개선
+
+**현재 상태**: 기본 리스트 형태
+**개선 목표**: 정보 밀도 + 시각적 계층 개선
+
+**개선 항목**:
+- 최근 거래가 하이라이트
+- 전월 대비 가격 변동 표시
+- 평형대별 시세 요약
+- 즐겨찾기 버튼 배치 개선
+
+---
+
+## 구현 현황 (2026-01-15 업데이트)
+
+### 완료 항목
+- [x] 토스트 알림 시스템 (1.3)
+- [x] 다크 모드 (1.4)
+- [x] 즐겨찾기 (2.1)
+- [x] 전월세 시세 차트 (2.2)
+- [x] 평형별 필터 (2.4)
+- [x] SEO 메타데이터 최적화 (5.1)
+- [x] E2E 테스트 (4.1)
+- [x] 스켈레톤 로딩 UI 다크 모드 적용 (1.1 + 7.2)
+
+### 진행 예정
+- [ ] 가격 변동 컬러 코딩 (7.1) ← **다음 진행**
+- [ ] 커스텀 에러 페이지 (1.2)
+- [ ] 마이크로 애니메이션 (7.3)
+
+### 보류
+- [ ] 학교 정보 (raw_schools 테이블 필요)
+- [ ] 공유 기능 (카카오 SDK 설정 필요)
+
+---
+
 ## 체크리스트
 
 구현 시 확인 사항:

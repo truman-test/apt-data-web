@@ -33,7 +33,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
         aria-label="이전 페이지"
       >
         <ChevronLeft className="h-5 w-5" />
@@ -44,12 +44,12 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         <>
           <button
             onClick={() => onPageChange(1)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-sm text-gray-600 transition-colors hover:bg-gray-50"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           >
             1
           </button>
           {pageNumbers[0] > 2 && (
-            <span className="flex h-10 w-10 items-center justify-center text-gray-400">...</span>
+            <span className="flex h-10 w-10 items-center justify-center text-gray-400 dark:text-gray-500">...</span>
           )}
         </>
       )}
@@ -62,7 +62,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           className={`flex h-10 w-10 items-center justify-center rounded-lg border text-sm transition-colors ${
             page === currentPage
               ? 'border-blue-600 bg-blue-600 font-semibold text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-50'
+              : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
           }`}
         >
           {page}
@@ -73,11 +73,11 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       {pageNumbers[pageNumbers.length - 1] < totalPages && (
         <>
           {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
-            <span className="flex h-10 w-10 items-center justify-center text-gray-400">...</span>
+            <span className="flex h-10 w-10 items-center justify-center text-gray-400 dark:text-gray-500">...</span>
           )}
           <button
             onClick={() => onPageChange(totalPages)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-sm text-gray-600 transition-colors hover:bg-gray-50"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           >
             {totalPages}
           </button>
@@ -88,7 +88,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
         aria-label="다음 페이지"
       >
         <ChevronRight className="h-5 w-5" />

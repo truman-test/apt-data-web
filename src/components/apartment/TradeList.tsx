@@ -24,10 +24,10 @@ function toPyeong(area: number): number {
 
 export function TradeList({ trades, isLoading, total }: TradeListProps) {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">최근 거래 내역</h2>
-        <span className="text-sm text-gray-500">총 {total.toLocaleString()}건</span>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">최근 거래 내역</h2>
+        <span className="text-sm text-gray-500 dark:text-gray-400">총 {total.toLocaleString()}건</span>
       </div>
 
       {isLoading ? (
@@ -35,29 +35,29 @@ export function TradeList({ trades, isLoading, total }: TradeListProps) {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
         </div>
       ) : trades.length === 0 ? (
-        <div className="flex h-40 items-center justify-center text-gray-500">
+        <div className="flex h-40 items-center justify-center text-gray-500 dark:text-gray-400">
           거래 내역이 없습니다
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b text-left text-gray-500">
+              <tr className="border-b border-gray-200 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
                 <th className="pb-3 font-medium">거래일</th>
                 <th className="pb-3 font-medium">면적</th>
                 <th className="pb-3 font-medium">층</th>
                 <th className="pb-3 text-right font-medium">거래가</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {trades.slice(0, 10).map((trade) => (
-                <tr key={trade.id} className="hover:bg-gray-50">
-                  <td className="py-3 text-gray-900">{trade.dealDate}</td>
-                  <td className="py-3 text-gray-600">
+                <tr key={trade.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <td className="py-3 text-gray-900 dark:text-white">{trade.dealDate}</td>
+                  <td className="py-3 text-gray-600 dark:text-gray-400">
                     {trade.exclusiveArea.toFixed(0)}㎡ ({toPyeong(trade.exclusiveArea)}평)
                   </td>
-                  <td className="py-3 text-gray-600">{trade.floor}층</td>
-                  <td className="py-3 text-right font-semibold text-gray-900">
+                  <td className="py-3 text-gray-600 dark:text-gray-400">{trade.floor}층</td>
+                  <td className="py-3 text-right font-semibold text-gray-900 dark:text-white">
                     {formatPrice(trade.dealAmount)}
                   </td>
                 </tr>
@@ -66,7 +66,7 @@ export function TradeList({ trades, isLoading, total }: TradeListProps) {
           </table>
 
           {trades.length > 10 && (
-            <p className="mt-3 text-center text-sm text-gray-500">
+            <p className="mt-3 text-center text-sm text-gray-500 dark:text-gray-400">
               최근 10건만 표시됩니다
             </p>
           )}

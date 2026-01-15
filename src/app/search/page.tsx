@@ -2,11 +2,12 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
-import { Search, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchApartments } from '@/hooks/useApartment';
 import { ApartmentCard } from '@/components/search/ApartmentCard';
 import { Pagination } from '@/components/search/Pagination';
+import { SearchAutocomplete } from '@/components/search/SearchAutocomplete';
 import { ApartmentCardSkeleton } from '@/components/skeleton';
 
 function SearchContent() {
@@ -16,7 +17,6 @@ function SearchContent() {
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
 
   const [query, setQuery] = useState(initialQuery);
-  const [inputValue, setInputValue] = useState(initialQuery);
   const [page, setPage] = useState(initialPage);
 
   const { data, isLoading, isError } = useSearchApartments(query, { page, limit: 20 });
@@ -24,17 +24,13 @@ function SearchContent() {
   // URL 파라미터 변경 시 상태 동기화
   useEffect(() => {
     setQuery(initialQuery);
-    setInputValue(initialQuery);
     setPage(initialPage);
   }, [initialQuery, initialPage]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputValue.trim().length >= 2) {
-      setQuery(inputValue.trim());
-      setPage(1);
-      router.push(`/search?q=${encodeURIComponent(inputValue.trim())}`);
-    }
+  const handleSearch = (newQuery: string) => {
+    setQuery(newQuery);
+    setPage(1);
+    router.push(`/search?q=${encodeURIComponent(newQuery)}`);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -48,31 +44,27 @@ function SearchContent() {
   const totalPages = Math.ceil(total / 20);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="text-gray-600 hover:text-gray-900">
+          <Link href="/" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <form onSubmit={handleSearch} className="flex flex-1 gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="아파트명, 지역명으로 검색"
-                className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              검색
-            </button>
-          </form>
+          <SearchAutocomplete
+            initialValue={query}
+            variant="header"
+            onSearch={handleSearch}
+            placeholder="아파트명, 지역명으로 검색"
+            className="flex-1"
+          />
+          <button
+            type="button"
+            onClick={() => query && handleSearch(query)}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            검색
+          </button>
         </div>
       </header>
 
@@ -81,9 +73,9 @@ function SearchContent() {
         {/* 검색어가 없을 때 */}
         {!query && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Search className="mb-4 h-12 w-12 text-gray-300" />
-            <p className="text-gray-500">검색어를 입력해주세요</p>
-            <p className="mt-1 text-sm text-gray-400">아파트명 또는 지역명으로 검색할 수 있습니다</p>
+            <Search className="mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
+            <p className="text-gray-500 dark:text-gray-400">검색어를 입력해주세요</p>
+            <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">아파트명 또는 지역명으로 검색할 수 있습니다</p>
           </div>
         )}
 
@@ -91,7 +83,7 @@ function SearchContent() {
         {query && isLoading && (
           <div>
             <div className="mb-4">
-              <div className="h-5 w-48 animate-pulse rounded bg-gray-200" />
+              <div className="h-5 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -104,10 +96,10 @@ function SearchContent() {
         {/* 에러 */}
         {query && isError && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-red-500">검색 중 오류가 발생했습니다</p>
+            <p className="text-red-500 dark:text-red-400">검색 중 오류가 발생했습니다</p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 rounded-lg bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200"
+              className="mt-4 rounded-lg bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               다시 시도
             </button>
@@ -119,17 +111,17 @@ function SearchContent() {
           <>
             {/* 결과 헤더 */}
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                <span className="font-semibold text-gray-900">&quot;{query}&quot;</span> 검색 결과{' '}
-                <span className="font-semibold text-blue-600">{total.toLocaleString()}</span>건
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-gray-900 dark:text-white">&quot;{query}&quot;</span> 검색 결과{' '}
+                <span className="font-semibold text-blue-600 dark:text-blue-400">{total.toLocaleString()}</span>건
               </p>
             </div>
 
             {/* 결과 없음 */}
             {apartments.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-gray-500">검색 결과가 없습니다</p>
-                <p className="mt-1 text-sm text-gray-400">다른 검색어로 시도해보세요</p>
+                <p className="text-gray-500 dark:text-gray-400">검색 결과가 없습니다</p>
+                <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">다른 검색어로 시도해보세요</p>
               </div>
             )}
 

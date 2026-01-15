@@ -1,20 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, MapPin, TrendingUp, School, Train, Heart } from 'lucide-react';
+import { MapPin, TrendingUp, School, Train, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { SearchAutocomplete } from '@/components/search/SearchAutocomplete';
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
@@ -48,25 +39,11 @@ export default function Home() {
             2,200만 건의 실거래가 데이터로 정확한 시세를 확인하세요
           </p>
 
-          {/* Search Form */}
-          <form onSubmit={handleSearch} className="w-full max-w-2xl">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="아파트명, 지역명으로 검색하세요"
-                className="h-14 w-full rounded-full border border-gray-200 bg-white pl-12 pr-32 text-lg shadow-lg transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-blue-500 dark:focus:ring-blue-800"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-              >
-                검색
-              </button>
-            </div>
-          </form>
+          {/* Search Form with Autocomplete */}
+          <SearchAutocomplete
+            variant="home"
+            className="w-full max-w-2xl"
+          />
 
           {/* Quick Links */}
           <div className="mt-6 flex flex-wrap justify-center gap-2">

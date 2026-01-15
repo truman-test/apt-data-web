@@ -69,35 +69,35 @@ export function CompareTable({ apartments, stations }: CompareTableProps) {
   };
 
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">기본 정보 비교</h2>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">기본 정보 비교</h2>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b">
-              <th className="pb-3 pr-4 text-left font-medium text-gray-500">항목</th>
+            <tr className="border-b border-gray-200 dark:border-gray-700">
+              <th className="pb-3 pr-4 text-left font-medium text-gray-500 dark:text-gray-400">항목</th>
               {apartments.map((apt) => (
                 <th
                   key={apt.id}
-                  className="min-w-[150px] pb-3 text-left font-semibold text-gray-900"
+                  className="min-w-[150px] pb-3 text-left font-semibold text-gray-900 dark:text-white"
                 >
                   {apt.aptName}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {[...rows.slice(0, 2), ageRow, ...rows.slice(2)].map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50">
+              <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                 <td className="py-3 pr-4">
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                     {row.icon}
                     <span>{row.label}</span>
                   </div>
                 </td>
                 {row.values.map((value, i) => (
-                  <td key={i} className="py-3 text-gray-900">
+                  <td key={i} className="py-3 text-gray-900 dark:text-white">
                     {value}
                   </td>
                 ))}

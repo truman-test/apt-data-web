@@ -72,13 +72,13 @@ export function RentChart({ aptId, selectedArea }: RentChartProps) {
   const latestMonthlyRent = data.length > 0 ? data[data.length - 1].avgMonthlyRent : 0;
 
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">전월세 시세</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">전월세 시세</h2>
           {data.length > 0 && (
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
                 {rentType === 'jeonse'
                   ? formatPrice(latestDeposit)
                   : `${formatPrice(latestDeposit)} / ${latestMonthlyRent}만`
@@ -109,7 +109,7 @@ export function RentChart({ aptId, selectedArea }: RentChartProps) {
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   rentType === t.value
                     ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                 }`}
               >
                 {t.label}
@@ -126,7 +126,7 @@ export function RentChart({ aptId, selectedArea }: RentChartProps) {
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   period === p.value
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                 }`}
               >
                 {p.label}
@@ -143,18 +143,18 @@ export function RentChart({ aptId, selectedArea }: RentChartProps) {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-600 border-t-transparent" />
           </div>
         ) : data.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-gray-500">
+          <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400">
             {rentType === 'jeonse' ? '전세' : '월세'} 거래 데이터가 없습니다
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 11, fill: '#9ca3af' }}
                 tickLine={false}
-                axisLine={{ stroke: '#e5e7eb' }}
+                axisLine={{ stroke: '#4b5563' }}
                 tickFormatter={(value) => {
                   const [year, month] = value.split('-');
                   return `${year.slice(2)}.${month}`;
@@ -172,17 +172,17 @@ export function RentChart({ aptId, selectedArea }: RentChartProps) {
                   if (!active || !payload?.length) return null;
                   const item = payload[0].payload as RentTrend;
                   return (
-                    <div className="rounded-lg border bg-white px-3 py-2 shadow-lg">
-                      <p className="text-xs text-gray-500">{item.date}</p>
-                      <p className="font-semibold text-gray-900">
+                    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{item.date}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
                         보증금 {formatPrice(item.avgDeposit)}
                       </p>
                       {rentType === 'monthly' && item.avgMonthlyRent > 0 && (
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
                           월세 {item.avgMonthlyRent.toLocaleString()}만
                         </p>
                       )}
-                      <p className="text-xs text-gray-500">{item.transactionCount}건 거래</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{item.transactionCount}건 거래</p>
                     </div>
                   );
                 }}

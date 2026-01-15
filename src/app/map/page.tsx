@@ -115,12 +115,12 @@ export default function MapPage() {
     <MapProvider>
       <div className="flex h-screen flex-col">
         {/* Header */}
-        <header className="z-10 border-b bg-white shadow-sm">
+        <header className="z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <div className="flex h-14 items-center gap-4 px-4">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">
+            <Link href="/" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-lg font-semibold">지도 검색</h1>
+            <h1 className="text-lg font-semibold dark:text-white">지도 검색</h1>
 
             {/* 지역 선택 */}
             <div className="ml-auto flex gap-1">
@@ -131,7 +131,7 @@ export default function MapPage() {
                   className={`rounded-full px-3 py-1 text-sm transition-colors ${
                     center.name === region.name
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   {region.name}
@@ -152,33 +152,33 @@ export default function MapPage() {
 
           {/* 로딩 인디케이터 */}
           {isLoading && (
-            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-md">
+            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-md dark:bg-gray-800">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-              <span className="text-sm text-gray-600">로딩 중...</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">로딩 중...</span>
             </div>
           )}
 
           {/* 아파트 개수 표시 */}
           {!isLoading && apartments.length > 0 && (
-            <div className="absolute left-4 top-4 rounded-lg bg-white px-3 py-2 shadow-md">
-              <span className="text-sm text-gray-600">
-                <span className="font-semibold text-blue-600">{apartments.length}</span>개 단지
+            <div className="absolute left-4 top-4 rounded-lg bg-white px-3 py-2 shadow-md dark:bg-gray-800">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-blue-600 dark:text-blue-400">{apartments.length}</span>개 단지
               </span>
             </div>
           )}
 
           {/* 선택된 아파트 정보 */}
           {selectedApt && (
-            <div className="absolute bottom-4 left-4 right-4 mx-auto max-w-md rounded-xl bg-white p-4 shadow-lg">
+            <div className="absolute bottom-4 left-4 right-4 mx-auto max-w-md rounded-xl bg-white p-4 shadow-lg dark:bg-gray-800">
               <button
                 onClick={() => setSelectedApt(null)}
-                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="h-5 w-5" />
               </button>
-              <h3 className="pr-8 text-lg font-semibold text-gray-900">{selectedApt.aptName}</h3>
-              <p className="mt-1 text-sm text-gray-500">{selectedApt.address}</p>
-              <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
+              <h3 className="pr-8 text-lg font-semibold text-gray-900 dark:text-white">{selectedApt.aptName}</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{selectedApt.address}</p>
+              <div className="mt-3 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                 {selectedApt.constructedYear > 0 && <span>{selectedApt.constructedYear}년</span>}
                 {selectedApt.totalUnits > 0 && (
                   <span>{selectedApt.totalUnits.toLocaleString()}세대</span>
