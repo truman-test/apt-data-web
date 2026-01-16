@@ -54,12 +54,12 @@ export async function GET(
         startYear = 2006;
     }
 
-    // 면적 조건 (±0.1㎡ 범위 - 26평/27평 등 근접 평형 구분)
+    // 면적 조건 (±0.005㎡ 범위 - 근접 평형 정확 구분)
     let areaCondition = '';
     if (area) {
       const areaNum = parseFloat(area);
       if (!isNaN(areaNum)) {
-        areaCondition = `AND exclu_use_ar BETWEEN ${areaNum - 0.1} AND ${areaNum + 0.1}`;
+        areaCondition = `AND exclu_use_ar BETWEEN ${areaNum - 0.005} AND ${areaNum + 0.005}`;
       }
     }
 
