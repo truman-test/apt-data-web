@@ -61,11 +61,11 @@ export async function GET(
       whereClause.monthly_rent = { gt: 0 };
     }
 
-    // 면적 필터 (±2㎡ 범위)
+    // 면적 필터 (±0.1㎡ 범위 - 26평/27평 등 근접 평형 구분)
     if (area) {
       whereClause.exclu_use_ar = {
-        gte: area - 2,
-        lte: area + 2,
+        gte: area - 0.1,
+        lte: area + 0.1,
       };
     }
 

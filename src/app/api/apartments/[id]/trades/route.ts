@@ -52,11 +52,11 @@ export async function GET(
       deal_year: { gte: startYear, lte: endYear },
     };
 
-    // 면적 필터 (±1㎡ 범위)
+    // 면적 필터 (±0.1㎡ 범위 - 26평/27평 등 근접 평형 구분)
     if (area) {
       const areaNum = parseFloat(area);
       if (!isNaN(areaNum)) {
-        whereClause.exclu_use_ar = { gte: areaNum - 1, lte: areaNum + 1 };
+        whereClause.exclu_use_ar = { gte: areaNum - 0.1, lte: areaNum + 0.1 };
       }
     }
 
