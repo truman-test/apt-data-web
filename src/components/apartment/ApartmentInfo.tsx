@@ -1,4 +1,4 @@
-import { MapPin, Building2, Calendar, Home } from 'lucide-react';
+import { MapPin, Building2, Calendar, Home, Flame, LayoutGrid, Hammer } from 'lucide-react';
 import type { Apartment } from '@/types/apartment';
 
 interface ApartmentInfoProps {
@@ -6,6 +6,8 @@ interface ApartmentInfoProps {
 }
 
 export function ApartmentInfo({ apartment }: ApartmentInfoProps) {
+  const { kaptInfo } = apartment;
+
   const infoItems = [
     {
       icon: MapPin,
@@ -29,11 +31,39 @@ export function ApartmentInfo({ apartment }: ApartmentInfoProps) {
     },
   ];
 
+  // K-apt 추가 정보
+  const kaptItems = [
+    {
+      icon: Flame,
+      label: '난방방식',
+      value: kaptInfo?.heatType,
+    },
+    {
+      icon: LayoutGrid,
+      label: '복도유형',
+      value: kaptInfo?.hallwayType,
+    },
+    {
+      icon: Hammer,
+      label: '시공사',
+      value: kaptInfo?.buildCompany,
+    },
+  ].filter((item) => item.value);
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">기본 정보</h2>
       <dl className="space-y-4">
         {infoItems.map((item) => (
+          <div key={item.label} className="flex items-start gap-3">
+            <item.icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+            <div className="min-w-0 flex-1">
+              <dt className="text-xs text-gray-500 dark:text-gray-400">{item.label}</dt>
+              <dd className="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">{item.value}</dd>
+            </div>
+          </div>
+        ))}
+        {kaptItems.map((item) => (
           <div key={item.label} className="flex items-start gap-3">
             <item.icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500" />
             <div className="min-w-0 flex-1">

@@ -39,7 +39,8 @@ model apt_master {
 
   // Relations
   nearest_station apt_nearest_station?
-  kapt_info       raw_kapt_info?        @relation(fields: [kapt_code], references: [kapt_code])
+  kapt_info       raw_kapt_info?        @relation(fields: [kapt_code], references: [kapt_code], map: "apt_master_kapt_info_fkey")
+  kapt_detail     raw_kapt_detail?      @relation(fields: [kapt_code], references: [kapt_code], map: "apt_master_kapt_detail_fkey")
 
   @@unique([sigungu_cd, umd_nm, apt_nm, build_year], map: "uq_apt_master_identity")
   @@index([apt_nm], map: "idx_apt_master_apt_nm")
@@ -79,6 +80,9 @@ model raw_trades {
   deal_amount  BigInt?
   floor        Int?
   build_year   Int?
+  cdeal_type   String?   @db.VarChar(10)  // 거래유형 (신규/해지)
+  cdeal_day    String?   @db.VarChar(10)  // 해지일
+  dealing_gbn  String?   @db.VarChar(20)  // 거래방식 (직거래/중개거래)
   collected_at DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([sigungu_cd, apt_nm], map: "idx_raw_trades_sigungu_apt")
@@ -89,20 +93,25 @@ model raw_trades {
 
 // 전월세 실거래가 (11.8M건)
 model raw_rents {
-  id           BigInt    @id @default(autoincrement())
-  sigungu_cd   String    @db.VarChar(5)
-  umd_nm       String?   @db.VarChar(50)
-  apt_nm       String?   @db.VarChar(100)
-  jibun        String?   @db.VarChar(20)
-  exclu_use_ar Decimal?  @db.Decimal(10, 4)
-  deal_year    Int
-  deal_month   Int
-  deal_day     Int?
-  deposit      BigInt?
-  monthly_rent BigInt?
-  floor        Int?
-  build_year   Int?
-  collected_at DateTime? @default(now()) @db.Timestamptz(6)
+  id                BigInt    @id @default(autoincrement())
+  sigungu_cd        String    @db.VarChar(5)
+  umd_nm            String?   @db.VarChar(50)
+  apt_nm            String?   @db.VarChar(100)
+  jibun             String?   @db.VarChar(20)
+  exclu_use_ar      Decimal?  @db.Decimal(10, 4)
+  deal_year         Int
+  deal_month        Int
+  deal_day          Int?
+  deposit           BigInt?
+  monthly_rent      BigInt?
+  floor             Int?
+  build_year        Int?
+  contract_type     String?   @db.VarChar(10)  // 계약구분 (신규/갱신)
+  contract_period   String?   @db.VarChar(20)  // 계약기간
+  use_rr_right      String?   @db.VarChar(10)  // 갱신요구권 사용 여부
+  prev_deposit      BigInt?                     // 종전 보증금
+  prev_monthly_rent BigInt?                     // 종전 월세
+  collected_at      DateTime? @default(now()) @db.Timestamptz(6)
 
   @@index([sigungu_cd, apt_nm], map: "idx_raw_rents_sigungu_apt")
   @@index([apt_nm], map: "idx_raw_rents_apt_nm")
@@ -112,24 +121,100 @@ model raw_rents {
 
 // K-apt 기본정보 (세대수, 동수 등)
 model raw_kapt_info {
-  id             Int          @id @default(autoincrement())
-  kapt_code      String       @unique @db.VarChar(20)
-  kapt_name      String?      @db.VarChar(100)
-  do_nm          String?      @db.VarChar(20)
-  sigungu_nm     String?      @db.VarChar(30)
-  umd_nm         String?      @db.VarChar(50)
-  jibun          String?      @db.VarChar(20)
-  road_nm_addr   String?      @db.VarChar(200)
-  build_year     Int?
-  total_dong_cnt Int?
-  total_ho_cnt   Int?
-  total_unit_cnt Int?
-  collected_at   DateTime?    @default(now()) @db.Timestamptz(6)
+  id                 Int          @id @default(autoincrement())
+  kapt_code          String       @unique @db.VarChar(20)
+  kapt_name          String?      @db.VarChar(100)
+  do_nm              String?      @db.VarChar(20)
+  sigungu_nm         String?      @db.VarChar(30)
+  umd_nm             String?      @db.VarChar(50)
+  jibun              String?      @db.VarChar(20)
+  road_nm_addr       String?      @db.VarChar(200)
+  code_apt_nm        String?      @db.VarChar(100)
+  build_year         Int?
+  total_dong_cnt     Int?
+  total_ho_cnt       Int?
+  supply_ar_range    String?      @db.VarChar(50)
+  manage_type        String?      @db.VarChar(20)
+  hallway_type       String?      @db.VarChar(20)
+  heat_type          String?      @db.VarChar(20)
+  kaptd_wtimebus     String?      @db.VarChar(100)
+  kaptd_wtime_subway String?      @db.VarChar(100)
+  collected_at       DateTime?    @default(now()) @db.Timestamptz(6)
+  bjd_code           String?      @db.VarChar(10)
+  ri_nm              String?      @db.VarChar(100)
+  kapt_addr          String?      @db.VarChar(200)
+  code_sale_nm       String?      @db.VarChar(100)
+  total_unit_cnt     Int?
+  pri_use_ar         Float?       @db.Real
+  kapt_mparea_meter  Float?       @db.Real
+  kapt_mgrnt_cnt     Int?
+  kapt_bcompany      String?      @db.VarChar(100)
+  kapt_acompany      String?      @db.VarChar(100)
+  kapt_tel           String?      @db.VarChar(50)
+  kapt_fax           String?      @db.VarChar(50)
+  kapt_url           String?      @db.VarChar(200)
+  kapt_usedate       String?      @db.VarChar(20)
+  kapt_top_floor     Int?
+  kapt_base_floor    Int?
+  kapt_tarea         Float?       @db.Real
+  kapt_marea         Float?       @db.Real
+  priv_area          Float?       @db.Real
+  kapt_mparea_60     Int?
+  kapt_mparea_85     Int?
+  kapt_mparea_135    Int?
+  kapt_mparea_136    Int?
 
   apartments apt_master[]
 
   @@index([kapt_name], map: "idx_raw_kapt_info_name")
   @@index([sigungu_nm], map: "idx_raw_kapt_info_sigungu")
+}
+
+// K-apt 상세정보 (시설, 관리 등)
+model raw_kapt_detail {
+  id                         Int       @id @default(autoincrement())
+  kapt_code                  String    @unique @db.VarChar(20)
+  kapt_name                  String?   @db.VarChar(200)
+  code_mgr                   String?   @db.VarChar(50)
+  kapt_mgr_cnt               Int?
+  kapt_ccompany              String?   @db.VarChar(200)
+  code_sec                   String?   @db.VarChar(50)
+  kaptd_scnt                 Int?
+  kaptd_sec_com              String?   @db.VarChar(200)
+  code_clean                 String?   @db.VarChar(50)
+  kaptd_clcnt                Int?
+  code_disinf                String?   @db.VarChar(50)
+  kaptd_dcnt                 Int?
+  code_garbage               String?   @db.VarChar(50)
+  disposal_type              String?   @db.VarChar(50)
+  code_str                   String?   @db.VarChar(50)
+  kaptd_ecapa                String?   @db.VarChar(50)
+  code_econ                  String?   @db.VarChar(50)
+  code_emgr                  String?   @db.VarChar(50)
+  code_falarm                String?   @db.VarChar(50)
+  code_wsupply               String?   @db.VarChar(50)
+  code_elev                  String?   @db.VarChar(50)
+  kaptd_ecnt                 Int?
+  kaptd_pcnt                 Int?
+  kaptd_pcntu                Int?
+  code_net                   String?   @db.VarChar(10)
+  kaptd_cccnt                Int?
+  kaptd_wtime_bus            String?   @db.VarChar(50)
+  subway_line                String?   @db.VarChar(200)
+  subway_station             String?   @db.VarChar(200)
+  kaptd_wtime_sub            String?   @db.VarChar(50)
+  welfare_facility           String?
+  convenient_facility        String?
+  education_facility         String?
+  ground_el_charger_cnt      Int?
+  underground_el_charger_cnt Int?
+  use_yn                     String?   @db.VarChar(1)
+  collected_at               DateTime? @default(now()) @db.Timestamptz(6)
+
+  apartments apt_master[]
+
+  @@index([kapt_code], map: "idx_kapt_detail_kapt_code")
+  @@index([subway_station], map: "idx_kapt_detail_subway_station")
 }
 
 // 학교 정보 (12,610건)

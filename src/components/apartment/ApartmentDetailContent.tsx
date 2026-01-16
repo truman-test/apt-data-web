@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { useApartment, useNearestStation, usePriceTrend, useTrades, useAreaTypes } from '@/hooks/useApartment';
+import { useApartment, useNearestStation, usePriceTrend, useTrades, useRents, useAreaTypes } from '@/hooks/useApartment';
 import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
+import { FacilityInfo } from '@/components/apartment/FacilityInfo';
 import { PriceChart } from '@/components/chart/PriceChart';
 import { RentChart } from '@/components/chart/RentChart';
 import { TradeList } from '@/components/apartment/TradeList';
+import { RentList } from '@/components/apartment/RentList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
 import { AreaFilter } from '@/components/apartment/AreaFilter';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
@@ -36,12 +38,16 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
   const { data: tradesData, isLoading: tradesLoading } = useTrades(aptId, {
     area: selectedArea || undefined,
   });
+  const { data: rentsData, isLoading: rentsLoading } = useRents(aptId, {
+    area: selectedArea || undefined,
+  });
 
   const apartment = aptData?.data;
   const station = stationData?.data;
   const areaTypes = areaTypesData?.data || [];
   const priceTrend = trendData?.data || [];
   const trades = tradesData?.data || [];
+  const rents = rentsData?.data || [];
 
   // 로딩 상태 - 스켈레톤 UI
   if (aptLoading) {
@@ -110,9 +116,10 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
       {/* Main Content */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* 왼쪽: 기본 정보 + 교통 */}
+          {/* 왼쪽: 기본 정보 + 시설 + 교통 */}
           <div className="space-y-6 lg:col-span-1">
             <ApartmentInfo apartment={apartment} />
+            <FacilityInfo apartment={apartment} />
             <NearbyInfo station={station} />
           </div>
 
@@ -143,6 +150,11 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
               trades={trades}
               isLoading={tradesLoading}
               total={tradesData?.meta?.total || 0}
+            />
+            <RentList
+              rents={rents}
+              isLoading={rentsLoading}
+              total={rentsData?.meta?.total || 0}
             />
           </div>
         </div>

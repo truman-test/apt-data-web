@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useMapContext } from './MapProvider';
 
 interface NaverMapProps {
   center?: { lat: number; lng: number };
@@ -17,9 +18,10 @@ export default function NaverMap({
 }: NaverMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<naver.maps.Map | null>(null);
+  const { isLoaded } = useMapContext();
 
   useEffect(() => {
-    if (!mapRef.current || !window.naver) return;
+    if (!mapRef.current || !isLoaded || !window.naver) return;
 
     const mapInstance = new naver.maps.Map(mapRef.current, {
       center: new naver.maps.LatLng(center.lat, center.lng),
@@ -36,7 +38,7 @@ export default function NaverMap({
     return () => {
       mapInstance.destroy();
     };
-  }, []);
+  }, [isLoaded]);
 
   useEffect(() => {
     if (!map) return;

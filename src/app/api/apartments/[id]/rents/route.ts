@@ -22,6 +22,8 @@ export async function GET(
       searchParams.get('limit')
     );
     const rentType = searchParams.get('rentType'); // 'jeonse' | 'monthly'
+    const areaParam = searchParams.get('area');
+    const area = areaParam ? parseFloat(areaParam) : null;
     const startYear = parseInt(searchParams.get('startYear') || '2020', 10);
     const endYear = parseInt(searchParams.get('endYear') || new Date().getFullYear().toString(), 10);
 
@@ -47,6 +49,14 @@ export async function GET(
       whereClause.monthly_rent = 0;
     } else if (rentType === 'monthly') {
       whereClause.monthly_rent = { gt: 0 };
+    }
+
+    // 면적 필터 (±2㎡ 범위)
+    if (area) {
+      whereClause.exclu_use_ar = {
+        gte: area - 2,
+        lte: area + 2,
+      };
     }
 
     // 총 개수

@@ -19,6 +19,7 @@ export async function GET(
       where: { apt_id: id },
       include: {
         kapt_info: true,
+        kapt_detail: true,
         nearest_station: true,
       },
     });

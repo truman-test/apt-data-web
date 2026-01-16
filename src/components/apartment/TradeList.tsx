@@ -51,13 +51,41 @@ export function TradeList({ trades, isLoading, total }: TradeListProps) {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {trades.slice(0, 10).map((trade) => (
-                <tr key={trade.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="py-3 text-gray-900 dark:text-white">{trade.dealDate}</td>
-                  <td className="py-3 text-gray-600 dark:text-gray-400">
+                <tr
+                  key={trade.id}
+                  className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                    trade.isCanceled ? 'opacity-60' : ''
+                  }`}
+                >
+                  <td className="py-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-gray-900 dark:text-white ${trade.isCanceled ? 'line-through' : ''}`}>
+                        {trade.dealDate}
+                      </span>
+                      {trade.isCanceled && (
+                        <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/50 dark:text-red-400">
+                          해지
+                        </span>
+                      )}
+                      {trade.dealingType === 'direct' && (
+                        <span className="rounded bg-teal-100 px-1.5 py-0.5 text-xs font-medium text-teal-700 dark:bg-teal-900/50 dark:text-teal-400">
+                          직거래
+                        </span>
+                      )}
+                    </div>
+                    {trade.cancelDate && (
+                      <div className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+                        해지일: {trade.cancelDate}
+                      </div>
+                    )}
+                  </td>
+                  <td className={`py-3 text-gray-600 dark:text-gray-400 ${trade.isCanceled ? 'line-through' : ''}`}>
                     {trade.exclusiveArea.toFixed(0)}㎡ ({toPyeong(trade.exclusiveArea)}평)
                   </td>
-                  <td className="py-3 text-gray-600 dark:text-gray-400">{trade.floor}층</td>
-                  <td className="py-3 text-right font-semibold text-gray-900 dark:text-white">
+                  <td className={`py-3 text-gray-600 dark:text-gray-400 ${trade.isCanceled ? 'line-through' : ''}`}>
+                    {trade.floor}층
+                  </td>
+                  <td className={`py-3 text-right font-semibold text-gray-900 dark:text-white ${trade.isCanceled ? 'line-through' : ''}`}>
                     {formatPrice(trade.dealAmount)}
                   </td>
                 </tr>

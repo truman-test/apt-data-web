@@ -67,12 +67,13 @@ export async function getTrades(
 // 전월세 실거래가 조회
 export async function getRents(
   aptId: number,
-  options?: { startDate?: string; endDate?: string; rentType?: 'jeonse' | 'monthly' }
+  options?: { startDate?: string; endDate?: string; rentType?: 'jeonse' | 'monthly'; area?: number }
 ): Promise<ApiResponse<Rent[]>> {
   const params = new URLSearchParams();
   if (options?.startDate) params.append('startDate', options.startDate);
   if (options?.endDate) params.append('endDate', options.endDate);
   if (options?.rentType) params.append('rentType', options.rentType);
+  if (options?.area) params.append('area', String(options.area));
   return fetchApi(`/apartments/${aptId}/rents?${params}`);
 }
 

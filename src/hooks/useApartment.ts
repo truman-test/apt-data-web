@@ -40,7 +40,7 @@ export function useTrades(
 
 export function useRents(
   aptId: number,
-  options?: { startDate?: string; endDate?: string; rentType?: 'jeonse' | 'monthly' }
+  options?: { startDate?: string; endDate?: string; rentType?: 'jeonse' | 'monthly'; area?: number }
 ) {
   return useQuery({
     queryKey: ['rents', aptId, options],
