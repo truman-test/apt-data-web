@@ -143,7 +143,7 @@ export async function GET(
         ? group.ratios.reduce((a, b) => a + b, 0) / group.ratios.length
         : undefined;
 
-      // 소수점 버림 후 비교 (호갱노노 기준)
+      // 소수점 버림은 UI 표시용, 원본값은 API 필터링용
       const minExcluFloor = Math.floor(minExclu);
       const maxExcluFloor = Math.floor(maxExclu);
       const minSupplyFloor = Math.floor(minSupply);
@@ -153,10 +153,10 @@ export async function GET(
         id: index + 1,
         aptId: id,
         pyeong,
-        exclusiveArea: minExcluFloor, // 대표값 (소수점 버림)
+        exclusiveArea: minExclu, // 원본값 (API 필터링용)
         exclusiveAreaMin: minExcluFloor !== maxExcluFloor ? minExclu : undefined,
         exclusiveAreaMax: minExcluFloor !== maxExcluFloor ? maxExclu : undefined,
-        supplyArea: minSupplyFloor, // 대표값 (소수점 버림)
+        supplyArea: minSupply, // 원본값 (API 필터링용)
         supplyAreaMin: minSupplyFloor !== maxSupplyFloor ? minSupply : undefined,
         supplyAreaMax: minSupplyFloor !== maxSupplyFloor ? maxSupply : undefined,
         units: group.units,
