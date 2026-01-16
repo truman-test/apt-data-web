@@ -38,9 +38,10 @@ model apt_master {
   lng              Decimal?  @db.Decimal(10, 7)
 
   // Relations
-  nearest_station apt_nearest_station?
-  kapt_info       raw_kapt_info?        @relation(fields: [kapt_code], references: [kapt_code], map: "apt_master_kapt_info_fkey")
-  kapt_detail     raw_kapt_detail?      @relation(fields: [kapt_code], references: [kapt_code], map: "apt_master_kapt_detail_fkey")
+  nearest_station  apt_nearest_station?
+  area_type_list   apt_area_types[]
+  kapt_info        raw_kapt_info?        @relation(fields: [kapt_code], references: [kapt_code], map: "apt_master_kapt_info_fkey")
+  kapt_detail      raw_kapt_detail?      @relation(fields: [kapt_code], references: [kapt_code], map: "apt_master_kapt_detail_fkey")
 
   @@unique([sigungu_cd, umd_nm, apt_nm, build_year], map: "uq_apt_master_identity")
   @@index([apt_nm], map: "idx_apt_master_apt_nm")
@@ -64,6 +65,20 @@ model apt_nearest_station {
 
   @@index([apt_id], map: "idx_apt_nearest_station_apt_id")
   @@index([distance_m], map: "idx_apt_nearest_station_distance")
+}
+
+// 단지별 면적 타입 (451K건) - 공급면적, 전용률 정보
+model apt_area_types {
+  apt_id      Int     @map("apt_id")
+  exclu_area  Decimal @db.Decimal(10, 2) // 전용면적 (㎡)
+  supply_area Decimal @db.Decimal(10, 2) // 공급면적 (㎡)
+  exclu_ratio Decimal? @db.Decimal(5, 2) // 전용률 (%)
+  unit_count  Int?                        // 해당 면적 세대수
+
+  apartment apt_master @relation(fields: [apt_id], references: [apt_id])
+
+  @@id([apt_id, exclu_area])
+  @@index([apt_id], map: "idx_apt_area_types_apt")
 }
 
 // 매매 실거래가 (10.6M건)

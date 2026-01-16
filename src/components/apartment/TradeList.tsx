@@ -17,9 +17,9 @@ function formatPrice(value: number): string {
   return `${value.toLocaleString()}만`;
 }
 
-// 면적을 평으로 변환 (1평 = 3.3058㎡)
-function toPyeong(area: number): number {
-  return Math.round(area / 3.3058);
+// 공급면적을 평으로 변환 (호갱노노 기준: 1평 = 3.3㎡, 소수점 버림)
+function toPyeong(supplyArea: number): number {
+  return Math.floor(supplyArea / 3.3);
 }
 
 export function TradeList({ trades, isLoading, total }: TradeListProps) {
@@ -80,7 +80,13 @@ export function TradeList({ trades, isLoading, total }: TradeListProps) {
                     )}
                   </td>
                   <td className={`py-3 text-gray-600 dark:text-gray-400 ${trade.isCanceled ? 'line-through' : ''}`}>
-                    {trade.exclusiveArea.toFixed(0)}㎡ ({toPyeong(trade.exclusiveArea)}평)
+                    <div>{trade.supplyArea ? toPyeong(trade.supplyArea) : Math.floor(trade.exclusiveArea / 3.3)}평</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
+                      전용 {Math.floor(trade.exclusiveArea)}㎡
+                      {trade.supplyArea && (
+                        <span> / 공급 {Math.floor(trade.supplyArea)}㎡</span>
+                      )}
+                    </div>
                   </td>
                   <td className={`py-3 text-gray-600 dark:text-gray-400 ${trade.isCanceled ? 'line-through' : ''}`}>
                     {trade.floor}층

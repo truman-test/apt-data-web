@@ -26,25 +26,34 @@ interface ApartmentDetailContentProps {
 }
 
 export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
-  const [selectedArea, setSelectedArea] = useState<number | null>(null);
+  // 선택된 공급면적 (평형 구분용)
+  const [selectedSupplyArea, setSelectedSupplyArea] = useState<number | null>(null);
 
   const { data: aptData, isLoading: aptLoading, isError: aptError } = useApartment(aptId);
   const { data: stationData } = useNearestStation(aptId);
   const { data: areaTypesData, isLoading: areaTypesLoading } = useAreaTypes(aptId);
+
+  const areaTypes = areaTypesData?.data || [];
+
+  // 선택된 공급면적에 해당하는 전용면적 찾기 (API 필터링용)
+  const selectedAreaType = areaTypes.find(
+    (a) => selectedSupplyArea !== null && selectedSupplyArea === a.supplyArea
+  );
+  const selectedExclusiveArea = selectedAreaType?.exclusiveArea;
+
   const { data: trendData, isLoading: trendLoading } = usePriceTrend(aptId, {
     period: '3y',
-    area: selectedArea || undefined,
+    area: selectedExclusiveArea || undefined,
   });
   const { data: tradesData, isLoading: tradesLoading } = useTrades(aptId, {
-    area: selectedArea || undefined,
+    area: selectedExclusiveArea || undefined,
   });
   const { data: rentsData, isLoading: rentsLoading } = useRents(aptId, {
-    area: selectedArea || undefined,
+    area: selectedExclusiveArea || undefined,
   });
 
   const apartment = aptData?.data;
   const station = stationData?.data;
-  const areaTypes = areaTypesData?.data || [];
   const priceTrend = trendData?.data || [];
   const trades = tradesData?.data || [];
   const rents = rentsData?.data || [];
@@ -130,8 +139,8 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
               <h2 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">평형 선택</h2>
               <AreaFilter
                 areas={areaTypes}
-                selected={selectedArea}
-                onChange={setSelectedArea}
+                selected={selectedSupplyArea}
+                onChange={setSelectedSupplyArea}
                 isLoading={areaTypesLoading}
               />
             </div>
@@ -140,11 +149,11 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
               data={priceTrend}
               isLoading={trendLoading}
               aptId={aptId}
-              selectedArea={selectedArea}
+              selectedArea={selectedExclusiveArea}
             />
             <RentChart
               aptId={aptId}
-              selectedArea={selectedArea}
+              selectedArea={selectedExclusiveArea}
             />
             <TradeList
               trades={trades}

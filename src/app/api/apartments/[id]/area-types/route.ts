@@ -3,9 +3,18 @@ import { prisma } from '@/lib/prisma';
 import { successResponse, errorResponse, validateId } from '@/lib/api-response';
 import type { AreaType } from '@/types/apartment';
 
-// ㎡를 평으로 변환 (1평 = 3.305785 ㎡)
+// ㎡를 평으로 변환 (1평 = 3.3 ㎡, 호갱노노 기준 - 내림)
 function sqmToPyeong(sqm: number): number {
-  return Math.round(sqm / 3.305785);
+  return Math.floor(sqm / 3.3);
+}
+
+// 그룹화된 면적 타입
+interface GroupedArea {
+  pyeong: number;
+  exclusiveAreas: number[];
+  supplyAreas: number[];
+  units: number;
+  ratios: number[];
 }
 
 export async function GET(
@@ -30,48 +39,132 @@ export async function GET(
       return errorResponse('아파트를 찾을 수 없습니다', 404);
     }
 
-    // 고유한 면적 목록 조회 (거래 건수와 함께)
-    const areaData = await prisma.$queryRaw<
-      Array<{ exclu_use_ar: number; count: bigint }>
-    >`
-      SELECT
-        ROUND(exclu_use_ar::numeric, 2) as exclu_use_ar,
-        COUNT(*) as count
-      FROM raw_trades
-      WHERE sigungu_cd = ${apt.sigungu_cd}
-        AND apt_nm = ${apt.apt_nm}
-        AND exclu_use_ar > 0
-      GROUP BY ROUND(exclu_use_ar::numeric, 2)
-      ORDER BY exclu_use_ar ASC
-    `;
+    // apt_area_types 테이블에서 조회
+    const areaTypes = await prisma.apt_area_types.findMany({
+      where: { apt_id: id },
+      orderBy: { supply_area: 'asc' },
+    });
 
-    // 평형별로 그룹화 (비슷한 면적 통합)
-    const pyeongMap = new Map<number, { areas: number[]; count: number }>();
+    if (areaTypes.length === 0) {
+      return successResponse([]);
+    }
 
-    for (const row of areaData) {
-      const area = Number(row.exclu_use_ar);
-      const pyeong = sqmToPyeong(area);
+    // 공급면적 기준 평수로 그룹화
+    // 전용률 100%인 세대는 제외 (오피스텔/상가 등)
+    const groupMap = new Map<number, GroupedArea>();
 
-      if (pyeongMap.has(pyeong)) {
-        const existing = pyeongMap.get(pyeong)!;
-        existing.areas.push(area);
-        existing.count += Number(row.count);
+    for (const row of areaTypes) {
+      const supplyArea = Number(row.supply_area);
+      const excluArea = Number(row.exclu_area);
+      const ratio = row.exclu_ratio ? Number(row.exclu_ratio) : 0;
+
+      // 전용률 95% 이상이면 오피스텔/상가로 간주하여 제외
+      if (ratio >= 95) continue;
+
+      const pyeong = sqmToPyeong(supplyArea);
+      const units = row.unit_count ?? 0;
+
+      if (groupMap.has(pyeong)) {
+        const group = groupMap.get(pyeong)!;
+        group.exclusiveAreas.push(excluArea);
+        group.supplyAreas.push(supplyArea);
+        group.units += units;
+        if (ratio > 0) group.ratios.push(ratio);
       } else {
-        pyeongMap.set(pyeong, { areas: [area], count: Number(row.count) });
+        groupMap.set(pyeong, {
+          pyeong,
+          exclusiveAreas: [excluArea],
+          supplyAreas: [supplyArea],
+          units,
+          ratios: ratio > 0 ? [ratio] : [],
+        });
       }
     }
 
-    // 결과 변환
-    const result: AreaType[] = Array.from(pyeongMap.entries()).map(
-      ([pyeong, data], index) => ({
+    // 평형별 최근 시세 조회 (매매/전세)
+    const pyeongList = Array.from(groupMap.keys());
+    const priceMap = new Map<number, { tradePrice?: number; jeonsePrice?: number }>();
+
+    // 각 평형별로 시세 조회
+    for (const [pyeong, group] of groupMap) {
+      const minExclu = Math.min(...group.exclusiveAreas);
+      const maxExclu = Math.max(...group.exclusiveAreas);
+
+      // 최근 매매가 조회
+      const latestTrade = await prisma.raw_trades.findFirst({
+        where: {
+          sigungu_cd: apt.sigungu_cd,
+          apt_nm: apt.apt_nm,
+          exclu_use_ar: { gte: minExclu - 1, lte: maxExclu + 1 },
+          cdeal_type: null, // 해지되지 않은 거래
+        },
+        orderBy: [
+          { deal_year: 'desc' },
+          { deal_month: 'desc' },
+          { deal_day: 'desc' },
+        ],
+        select: { deal_amount: true },
+      });
+
+      // 최근 전세가 조회
+      const latestJeonse = await prisma.raw_rents.findFirst({
+        where: {
+          sigungu_cd: apt.sigungu_cd,
+          apt_nm: apt.apt_nm,
+          exclu_use_ar: { gte: minExclu - 1, lte: maxExclu + 1 },
+          monthly_rent: 0, // 전세만
+        },
+        orderBy: [
+          { deal_year: 'desc' },
+          { deal_month: 'desc' },
+          { deal_day: 'desc' },
+        ],
+        select: { deposit: true },
+      });
+
+      priceMap.set(pyeong, {
+        tradePrice: latestTrade?.deal_amount ? Number(latestTrade.deal_amount) : undefined,
+        jeonsePrice: latestJeonse?.deposit ? Number(latestJeonse.deposit) : undefined,
+      });
+    }
+
+    // 결과 변환 (평수 순 정렬)
+    const sortedPyeongs = Array.from(groupMap.keys()).sort((a, b) => a - b);
+
+    const result: AreaType[] = sortedPyeongs.map((pyeong, index) => {
+      const group = groupMap.get(pyeong)!;
+      const prices = priceMap.get(pyeong);
+
+      const minExclu = Math.min(...group.exclusiveAreas);
+      const maxExclu = Math.max(...group.exclusiveAreas);
+      const minSupply = Math.min(...group.supplyAreas);
+      const maxSupply = Math.max(...group.supplyAreas);
+      const avgRatio = group.ratios.length > 0
+        ? group.ratios.reduce((a, b) => a + b, 0) / group.ratios.length
+        : undefined;
+
+      // 소수점 버림 후 비교 (호갱노노 기준)
+      const minExcluFloor = Math.floor(minExclu);
+      const maxExcluFloor = Math.floor(maxExclu);
+      const minSupplyFloor = Math.floor(minSupply);
+      const maxSupplyFloor = Math.floor(maxSupply);
+
+      return {
         id: index + 1,
         aptId: id,
-        exclusiveArea: data.areas[0], // 대표 면적
-        supplyArea: 0, // 공급면적 데이터 없음
         pyeong,
-        units: data.count, // 거래 건수로 대체
-      })
-    );
+        exclusiveArea: minExcluFloor, // 대표값 (소수점 버림)
+        exclusiveAreaMin: minExcluFloor !== maxExcluFloor ? minExclu : undefined,
+        exclusiveAreaMax: minExcluFloor !== maxExcluFloor ? maxExclu : undefined,
+        supplyArea: minSupplyFloor, // 대표값 (소수점 버림)
+        supplyAreaMin: minSupplyFloor !== maxSupplyFloor ? minSupply : undefined,
+        supplyAreaMax: minSupplyFloor !== maxSupplyFloor ? maxSupply : undefined,
+        units: group.units,
+        exclusiveRatio: avgRatio ? Math.round(avgRatio * 10) / 10 : undefined,
+        tradePrice: prices?.tradePrice,
+        jeonsePrice: prices?.jeonsePrice,
+      };
+    });
 
     return successResponse(result);
   } catch (error) {

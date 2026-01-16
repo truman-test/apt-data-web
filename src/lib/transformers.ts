@@ -79,8 +79,41 @@ export function transformApartment(
   };
 }
 
+// 면적 매핑 타입
+export interface AreaMapping {
+  excluArea: number;
+  supplyArea: number;
+  excluRatio: number | null;
+}
+
+// 전용면적으로 공급면적 찾기 (가장 가까운 매칭)
+function findSupplyArea(excluArea: number, areaMap: AreaMapping[]): { supplyArea?: number; excluRatio?: number } {
+  if (areaMap.length === 0) return {};
+
+  // 가장 가까운 전용면적 찾기
+  let closest = areaMap[0];
+  let minDiff = Math.abs(areaMap[0].excluArea - excluArea);
+
+  for (const a of areaMap) {
+    const diff = Math.abs(a.excluArea - excluArea);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = a;
+    }
+  }
+
+  // 차이가 1㎡ 이내인 경우만 매칭
+  if (minDiff < 1) {
+    return {
+      supplyArea: closest.supplyArea,
+      excluRatio: closest.excluRatio ?? undefined,
+    };
+  }
+  return {};
+}
+
 // raw_trades -> Trade 변환
-export function transformTrade(trade: raw_trades, aptId: number): Trade {
+export function transformTrade(trade: raw_trades, aptId: number, areaMap?: AreaMapping[]): Trade {
   const dealDay = trade.deal_day || 1;
   const dealDate = `${trade.deal_year}-${String(trade.deal_month).padStart(2, '0')}-${String(dealDay).padStart(2, '0')}`;
 
@@ -90,6 +123,9 @@ export function transformTrade(trade: raw_trades, aptId: number): Trade {
   // 거래 방식 (직거래/중개거래)
   const dealingType = trade.dealing_gbn === '직거래' ? 'direct' : trade.dealing_gbn === '중개거래' ? 'agent' : undefined;
 
+  const exclusiveArea = toNumber(trade.exclu_use_ar);
+  const { supplyArea, excluRatio } = areaMap ? findSupplyArea(exclusiveArea, areaMap) : {};
+
   return {
     id: Number(trade.id),
     aptId,
@@ -97,7 +133,9 @@ export function transformTrade(trade: raw_trades, aptId: number): Trade {
     dealYear: trade.deal_year,
     dealMonth: trade.deal_month,
     dealDay,
-    exclusiveArea: toNumber(trade.exclu_use_ar),
+    exclusiveArea,
+    supplyArea,
+    exclusiveRatio: excluRatio,
     floor: trade.floor || 0,
     dealAmount: Number(trade.deal_amount) || 0,
     isCanceled,
@@ -107,7 +145,7 @@ export function transformTrade(trade: raw_trades, aptId: number): Trade {
 }
 
 // raw_rents -> Rent 변환
-export function transformRent(rent: raw_rents, aptId: number): Rent {
+export function transformRent(rent: raw_rents, aptId: number, areaMap?: AreaMapping[]): Rent {
   const dealDay = rent.deal_day || 1;
   const dealDate = `${rent.deal_year}-${String(rent.deal_month).padStart(2, '0')}-${String(dealDay).padStart(2, '0')}`;
   const monthlyRent = Number(rent.monthly_rent) || 0;
@@ -134,13 +172,18 @@ export function transformRent(rent: raw_rents, aptId: number): Rent {
     depositChangeRate = Math.round((depositChange / prevDeposit) * 1000) / 10; // 소수점 1자리
   }
 
+  const exclusiveArea = toNumber(rent.exclu_use_ar);
+  const { supplyArea, excluRatio } = areaMap ? findSupplyArea(exclusiveArea, areaMap) : {};
+
   return {
     id: Number(rent.id),
     aptId,
     dealDate,
     dealYear: rent.deal_year,
     dealMonth: rent.deal_month,
-    exclusiveArea: toNumber(rent.exclu_use_ar),
+    exclusiveArea,
+    supplyArea,
+    exclusiveRatio: excluRatio,
     floor: rent.floor || 0,
     rentType: monthlyRent > 0 ? 'monthly' : 'jeonse',
     deposit,

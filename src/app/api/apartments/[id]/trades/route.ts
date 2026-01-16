@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@/generated/prisma';
 import { successResponse, errorResponse, validateId, validatePagination } from '@/lib/api-response';
-import { transformTrade } from '@/lib/transformers';
+import { transformTrade, AreaMapping } from '@/lib/transformers';
 
 export async function GET(
   request: NextRequest,
@@ -35,6 +35,16 @@ export async function GET(
       return errorResponse('아파트를 찾을 수 없습니다', 404);
     }
 
+    // apt_area_types에서 면적 매핑 조회
+    const areaTypes = await prisma.apt_area_types.findMany({
+      where: { apt_id: id },
+    });
+    const areaMap: AreaMapping[] = areaTypes.map((a) => ({
+      excluArea: Number(a.exclu_area),
+      supplyArea: Number(a.supply_area),
+      excluRatio: a.exclu_ratio ? Number(a.exclu_ratio) : null,
+    }));
+
     // 조건 구성
     const whereClause: Prisma.raw_tradesWhereInput = {
       sigungu_cd: apt.sigungu_cd,
@@ -66,7 +76,7 @@ export async function GET(
     });
 
     return successResponse(
-      trades.map((t) => transformTrade(t, id)),
+      trades.map((t) => transformTrade(t, id, areaMap)),
       { total, page, limit }
     );
   } catch (error) {

@@ -70,14 +70,22 @@ export interface KaptDetail {
   educationFacility?: string; // 교육시설
 }
 
-// 평형별 정보
+// 평형별 정보 (호갱노노 스타일 - 공급면적 기준 그룹화)
 export interface AreaType {
   id: number;
   aptId: number;
-  exclusiveArea: number; // 전용면적 (㎡)
-  supplyArea: number; // 공급면적 (㎡)
-  pyeong: number; // 평수
-  units: number; // 해당 평형 세대수
+  pyeong: number; // 평수 (공급면적 기준)
+  exclusiveArea: number; // 전용면적 대표값 (㎡)
+  exclusiveAreaMin?: number; // 전용면적 최소 (범위 표시용)
+  exclusiveAreaMax?: number; // 전용면적 최대
+  supplyArea: number; // 공급면적 대표값 (㎡)
+  supplyAreaMin?: number; // 공급면적 최소
+  supplyAreaMax?: number; // 공급면적 최대
+  units: number; // 해당 평형 세대수 합계
+  exclusiveRatio?: number; // 전용률 (%)
+  // 시세 정보
+  tradePrice?: number; // 최근 매매가 (만원)
+  jeonsePrice?: number; // 최근 전세가 (만원)
 }
 
 // 매매 실거래가
@@ -89,6 +97,8 @@ export interface Trade {
   dealMonth: number;
   dealDay: number;
   exclusiveArea: number;
+  supplyArea?: number; // 공급면적 (㎡)
+  exclusiveRatio?: number; // 전용률 (%)
   floor: number;
   dealAmount: number; // 만원 단위
   // 거래 상태
@@ -106,6 +116,8 @@ export interface Rent {
   dealYear: number;
   dealMonth: number;
   exclusiveArea: number;
+  supplyArea?: number; // 공급면적 (㎡)
+  exclusiveRatio?: number; // 전용률 (%)
   floor: number;
   rentType: 'jeonse' | 'monthly'; // 전세 | 월세
   deposit: number; // 보증금 (만원)
