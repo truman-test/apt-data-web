@@ -28,12 +28,16 @@ test.describe('홈 페이지', () => {
     await searchInput.fill('래미안');
     await page.locator('button:has-text("검색")').click();
 
-    await expect(page).toHaveURL(/\/search\?q=래미안/);
+    // URL 인코딩된 한글 허용
+    await expect(page).toHaveURL(/\/search\?q=/);
+    expect(decodeURIComponent(page.url())).toContain('래미안');
   });
 
   test('빠른 지역 링크 클릭', async ({ page }) => {
     await page.locator('a:has-text("서울")').first().click();
-    await expect(page).toHaveURL(/\/search\?q=서울/);
+    // URL 인코딩된 한글 허용
+    await expect(page).toHaveURL(/\/search\?q=/);
+    expect(decodeURIComponent(page.url())).toContain('서울');
   });
 
   test('지도검색 링크 이동', async ({ page }) => {
