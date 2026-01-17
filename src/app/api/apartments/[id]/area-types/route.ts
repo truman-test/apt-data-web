@@ -81,21 +81,21 @@ export async function GET(
       }
     }
 
-    // 평형별 최근 시세 조회 (매매/전세)
-    const pyeongList = Array.from(groupMap.keys());
+    // 평형별 최근 시세 조회 (매매/전세) - 단일 쿼리로 최적화
     const priceMap = new Map<number, { tradePrice?: number; jeonsePrice?: number }>();
 
-    // 각 평형별로 시세 조회
-    for (const [pyeong, group] of groupMap) {
-      const minExclu = Math.min(...group.exclusiveAreas);
-      const maxExclu = Math.max(...group.exclusiveAreas);
+    // 전체 면적 범위 계산
+    const allExcluAreas = Array.from(groupMap.values()).flatMap(g => g.exclusiveAreas);
+    const overallMinExclu = Math.min(...allExcluAreas) - 1;
+    const overallMaxExclu = Math.max(...allExcluAreas) + 1;
 
-      // 최근 매매가 조회
-      const latestTrade = await prisma.raw_trades.findFirst({
+    // 매매/전세 데이터를 병렬로 한 번에 조회
+    const [recentTrades, recentJeonse] = await Promise.all([
+      prisma.raw_trades.findMany({
         where: {
           sigungu_cd: apt.sigungu_cd,
           apt_nm: apt.apt_nm,
-          exclu_use_ar: { gte: minExclu - 1, lte: maxExclu + 1 },
+          exclu_use_ar: { gte: overallMinExclu, lte: overallMaxExclu },
           cdeal_type: null, // 해지되지 않은 거래
         },
         orderBy: [
@@ -103,15 +103,14 @@ export async function GET(
           { deal_month: 'desc' },
           { deal_day: 'desc' },
         ],
-        select: { deal_amount: true },
-      });
-
-      // 최근 전세가 조회
-      const latestJeonse = await prisma.raw_rents.findFirst({
+        select: { exclu_use_ar: true, deal_amount: true },
+        take: 500, // 충분한 양의 최근 거래
+      }),
+      prisma.raw_rents.findMany({
         where: {
           sigungu_cd: apt.sigungu_cd,
           apt_nm: apt.apt_nm,
-          exclu_use_ar: { gte: minExclu - 1, lte: maxExclu + 1 },
+          exclu_use_ar: { gte: overallMinExclu, lte: overallMaxExclu },
           monthly_rent: 0, // 전세만
         },
         orderBy: [
@@ -119,7 +118,25 @@ export async function GET(
           { deal_month: 'desc' },
           { deal_day: 'desc' },
         ],
-        select: { deposit: true },
+        select: { exclu_use_ar: true, deposit: true },
+        take: 500,
+      }),
+    ]);
+
+    // 각 평형에 해당하는 최신 거래 매칭
+    for (const [pyeong, group] of groupMap) {
+      const minExclu = Math.min(...group.exclusiveAreas) - 1;
+      const maxExclu = Math.max(...group.exclusiveAreas) + 1;
+
+      // 해당 면적 범위의 첫 번째(최신) 거래 찾기
+      const latestTrade = recentTrades.find(t => {
+        const area = Number(t.exclu_use_ar);
+        return area >= minExclu && area <= maxExclu;
+      });
+
+      const latestJeonse = recentJeonse.find(r => {
+        const area = Number(r.exclu_use_ar);
+        return area >= minExclu && area <= maxExclu;
       });
 
       priceMap.set(pyeong, {

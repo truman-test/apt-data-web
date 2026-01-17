@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { successResponse, errorResponse, validateId } from '@/lib/api-response';
 import type { PriceTrend } from '@/types/apartment';
@@ -47,33 +48,40 @@ export async function GET(
         startYear = 2006;
     }
 
+    // 동적 WHERE 조건 빌드 (Prisma.sql로 안전한 파라미터 바인딩)
+    const conditions = [
+      Prisma.sql`sigungu_cd = ${apt.sigungu_cd}`,
+      Prisma.sql`apt_nm = ${apt.apt_nm}`,
+      Prisma.sql`deal_year >= ${startYear}`,
+      Prisma.sql`deal_amount > 0`,
+    ];
+
     // 면적 조건 (±0.005㎡ 범위 - 근접 평형 정확 구분)
-    let areaCondition = '';
     if (area) {
       const areaNum = parseFloat(area);
       if (!isNaN(areaNum)) {
-        areaCondition = `AND exclu_use_ar BETWEEN ${areaNum - 0.005} AND ${areaNum + 0.005}`;
+        const minArea = areaNum - 0.005;
+        const maxArea = areaNum + 0.005;
+        conditions.push(Prisma.sql`exclu_use_ar BETWEEN ${minArea} AND ${maxArea}`);
       }
     }
 
-    // Raw SQL로 월별 평균가 집계
-    const trends = await prisma.$queryRawUnsafe<
+    const whereClause = Prisma.join(conditions, ' AND ');
+
+    // Raw SQL로 월별 평균가 집계 (파라미터화된 쿼리)
+    const trends = await prisma.$queryRaw<
       Array<{ deal_year: number; deal_month: number; avg_price: number; transaction_count: bigint }>
-    >(`
+    >(Prisma.sql`
       SELECT
         deal_year,
         deal_month,
         ROUND(AVG(deal_amount)) as avg_price,
         COUNT(*) as transaction_count
       FROM raw_trades
-      WHERE sigungu_cd = $1
-        AND apt_nm = $2
-        AND deal_year >= $3
-        AND deal_amount > 0
-        ${areaCondition}
+      WHERE ${whereClause}
       GROUP BY deal_year, deal_month
       ORDER BY deal_year ASC, deal_month ASC
-    `, apt.sigungu_cd, apt.apt_nm, startYear);
+    `);
 
     // 응답 형식 변환
     const result: PriceTrend[] = trends.map((t) => ({

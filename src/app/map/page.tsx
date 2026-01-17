@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Search, X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import MapProvider from '@/components/map/MapProvider';
 import NaverMap from '@/components/map/NaverMap';
 import { getApartmentsByBounds } from '@/services/api';
@@ -17,14 +17,6 @@ const REGIONS = [
   { name: '대구', lat: 35.8714, lng: 128.6014, zoom: 11 },
   { name: '인천', lat: 37.4563, lng: 126.7052, zoom: 11 },
 ];
-
-// 가격 포맷
-function formatPrice(value: number): string {
-  if (value >= 10000) {
-    return `${(value / 10000).toFixed(1)}억`;
-  }
-  return `${(value / 1000).toFixed(0)}천`;
-}
 
 export default function MapPage() {
   const [map, setMap] = useState<naver.maps.Map | null>(null);

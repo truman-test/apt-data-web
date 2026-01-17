@@ -2,35 +2,13 @@
 
 import { cn } from '@/lib/utils';
 import type { AreaType } from '@/types/apartment';
+import { formatPrice, formatAreaRange } from '@/lib/formatters';
 
 interface AreaFilterProps {
   areas: AreaType[];
   selected: number | null;
   onChange: (area: number | null) => void;
   isLoading?: boolean;
-}
-
-// 가격 포맷 (억/만원)
-function formatPrice(value: number): string {
-  if (value >= 10000) {
-    const eok = Math.floor(value / 10000);
-    const man = Math.round((value % 10000) / 1000) * 1000;
-    if (man === 0) return `${eok}억`;
-    return `${eok}억 ${man.toLocaleString()}`;
-  }
-  return `${value.toLocaleString()}만`;
-}
-
-// 면적 범위 포맷 (호갱노노 기준: 소수점 버림)
-function formatAreaRange(min?: number, max?: number, value?: number): string {
-  if (min !== undefined && max !== undefined) {
-    const minFloor = Math.floor(min);
-    const maxFloor = Math.floor(max);
-    if (minFloor !== maxFloor) {
-      return `${minFloor}~${maxFloor}㎡`;
-    }
-  }
-  return `${Math.floor(value || 0)}㎡`;
 }
 
 export function AreaFilter({ areas, selected, onChange, isLoading }: AreaFilterProps) {

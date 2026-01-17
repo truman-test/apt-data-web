@@ -1,25 +1,10 @@
 import type { Trade } from '@/types/apartment';
+import { formatPrice, toPyeong } from '@/lib/formatters';
 
 interface TradeListProps {
   trades: Trade[];
   isLoading: boolean;
   total: number;
-}
-
-// 가격 포맷 (억/만원)
-function formatPrice(value: number): string {
-  if (value >= 10000) {
-    const eok = Math.floor(value / 10000);
-    const man = value % 10000;
-    if (man === 0) return `${eok}억`;
-    return `${eok}억 ${Math.round(man / 1000) * 1000}`;
-  }
-  return `${value.toLocaleString()}만`;
-}
-
-// 공급면적을 평으로 변환 (호갱노노 기준: 1평 = 3.3㎡, 소수점 버림)
-function toPyeong(supplyArea: number): number {
-  return Math.floor(supplyArea / 3.3);
 }
 
 export function TradeList({ trades, isLoading, total }: TradeListProps) {

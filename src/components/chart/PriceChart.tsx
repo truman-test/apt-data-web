@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { usePriceTrend } from '@/hooks/useApartment';
 import type { PriceTrend } from '@/types/apartment';
+import { formatPrice, formatChartPrice } from '@/lib/formatters';
 
 interface PriceChartProps {
   data: PriceTrend[];
@@ -28,25 +29,6 @@ const periods: { value: Period; label: string }[] = [
   { value: '5y', label: '5년' },
   { value: 'all', label: '전체' },
 ];
-
-// 가격 포맷 (억/만원)
-function formatPrice(value: number): string {
-  if (value >= 10000) {
-    const eok = Math.floor(value / 10000);
-    const man = value % 10000;
-    if (man === 0) return `${eok}억`;
-    return `${eok}억 ${Math.round(man / 1000) * 1000}`;
-  }
-  return `${value.toLocaleString()}만`;
-}
-
-// 차트용 간단 포맷
-function formatChartPrice(value: number): string {
-  if (value >= 10000) {
-    return `${(value / 10000).toFixed(1)}억`;
-  }
-  return `${(value / 1000).toFixed(0)}천`;
-}
 
 export function PriceChart({ data: initialData, isLoading: initialLoading, aptId, selectedArea }: PriceChartProps) {
   const [period, setPeriod] = useState<Period>('3y');

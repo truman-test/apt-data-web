@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { useRentTrend } from '@/hooks/useApartment';
 import type { RentTrend } from '@/types/apartment';
+import { formatPrice, formatChartPrice } from '@/lib/formatters';
 
 interface RentChartProps {
   aptId: number;
@@ -32,25 +33,6 @@ const rentTypes: { value: RentType; label: string }[] = [
   { value: 'jeonse', label: '전세' },
   { value: 'monthly', label: '월세' },
 ];
-
-// 가격 포맷 (억/만원)
-function formatPrice(value: number): string {
-  if (value >= 10000) {
-    const eok = Math.floor(value / 10000);
-    const man = value % 10000;
-    if (man === 0) return `${eok}억`;
-    return `${eok}억 ${Math.round(man / 1000) * 1000}`;
-  }
-  return `${value.toLocaleString()}만`;
-}
-
-// 차트용 간단 포맷
-function formatChartPrice(value: number): string {
-  if (value >= 10000) {
-    return `${(value / 10000).toFixed(1)}억`;
-  }
-  return `${(value / 1000).toFixed(0)}천`;
-}
 
 export function RentChart({ aptId, selectedArea }: RentChartProps) {
   const [period, setPeriod] = useState<Period>('3y');
