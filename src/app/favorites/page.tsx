@@ -1,83 +1,18 @@
-'use client';
+import type { Metadata } from 'next';
+import { FavoritesContent } from './FavoritesContent';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Heart } from 'lucide-react';
-import { useFavoriteStore } from '@/stores/favoriteStore';
-import { useApartment } from '@/hooks/useApartment';
-import { ApartmentCard } from '@/components/search/ApartmentCard';
-import { ApartmentCardSkeleton } from '@/components/skeleton';
-
-function FavoriteApartmentCard({ aptId }: { aptId: number }) {
-  const { data, isLoading, isError } = useApartment(aptId);
-  const apartment = data?.data;
-
-  if (isLoading) {
-    return <ApartmentCardSkeleton />;
-  }
-
-  if (isError || !apartment) {
-    return null;
-  }
-
-  return <ApartmentCard apartment={apartment} />;
-}
+export const metadata: Metadata = {
+  title: '관심 단지',
+  description: '저장한 관심 아파트 목록입니다. 마음에 드는 아파트를 저장하고 한눈에 관리하세요.',
+  openGraph: {
+    title: '관심 단지 | 아파트 실거래가',
+    description: '저장한 관심 아파트 목록을 확인하세요.',
+  },
+  robots: {
+    index: false, // 개인화된 페이지이므로 검색엔진 색인 제외
+  },
+};
 
 export default function FavoritesPage() {
-  const [mounted, setMounted] = useState(false);
-  const favorites = useFavoriteStore((state) => state.favorites);
-
-  // Hydration mismatch 방지 (SSR에서 localStorage 접근 불가)
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setMounted(true), []);
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="text-lg font-semibold dark:text-white">관심 단지</h1>
-          {mounted && favorites.length > 0 && (
-            <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
-              {favorites.length}개
-            </span>
-          )}
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        {!mounted ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <ApartmentCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : favorites.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Heart className="mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
-            <p className="text-gray-500 dark:text-gray-400">관심 단지가 없습니다</p>
-            <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
-              마음에 드는 아파트에 하트를 눌러 저장하세요
-            </p>
-            <Link
-              href="/"
-              className="mt-6 rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
-            >
-              아파트 검색하기
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {favorites.map((aptId) => (
-              <FavoriteApartmentCard key={aptId} aptId={aptId} />
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
+  return <FavoritesContent />;
 }
