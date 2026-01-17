@@ -44,9 +44,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: `${apt.apt_nm} - 실거래가 및 시세`,
         description,
         type: 'article',
+        siteName: '아파트 실거래가',
       },
       twitter: {
-        card: 'summary',
+        card: 'summary_large_image',
         title: `${apt.apt_nm} - 실거래가`,
         description,
       },
