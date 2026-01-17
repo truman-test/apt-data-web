@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin } from 'lucide-react';
 import { useAutocomplete } from '@/hooks/useApartment';
@@ -30,7 +30,7 @@ export function SearchAutocomplete({
   const listRef = useRef<HTMLUListElement>(null);
 
   const { data, isLoading } = useAutocomplete(debouncedValue);
-  const items = data?.data || [];
+  const items = useMemo(() => data?.data || [], [data?.data]);
 
   // 디바운스 처리 (300ms)
   useEffect(() => {

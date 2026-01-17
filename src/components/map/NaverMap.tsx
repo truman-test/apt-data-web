@@ -20,12 +20,22 @@ export default function NaverMap({
   const [map, setMap] = useState<naver.maps.Map | null>(null);
   const { isLoaded } = useMapContext();
 
+  // 초기 center/zoom을 ref로 저장 (초기화 시에만 사용)
+  const initialCenterRef = useRef(center);
+  const initialZoomRef = useRef(zoom);
+  const onMapReadyRef = useRef(onMapReady);
+
+  // onMapReady 콜백 업데이트 (렌더링 외부에서)
+  useEffect(() => {
+    onMapReadyRef.current = onMapReady;
+  }, [onMapReady]);
+
   useEffect(() => {
     if (!mapRef.current || !isLoaded || !window.naver) return;
 
     const mapInstance = new naver.maps.Map(mapRef.current, {
-      center: new naver.maps.LatLng(center.lat, center.lng),
-      zoom,
+      center: new naver.maps.LatLng(initialCenterRef.current.lat, initialCenterRef.current.lng),
+      zoom: initialZoomRef.current,
       zoomControl: true,
       zoomControlOptions: {
         position: naver.maps.Position.TOP_RIGHT,
@@ -33,7 +43,7 @@ export default function NaverMap({
     });
 
     setMap(mapInstance);
-    onMapReady?.(mapInstance);
+    onMapReadyRef.current?.(mapInstance);
 
     return () => {
       mapInstance.destroy();

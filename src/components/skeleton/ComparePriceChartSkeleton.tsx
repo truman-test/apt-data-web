@@ -1,5 +1,8 @@
 import { Skeleton } from './Skeleton';
 
+// 차트 스켈레톤용 고정 높이 값 (렌더링 중 Math.random 호출 방지)
+const CHART_BAR_HEIGHTS = [45, 72, 58, 85, 63, 78, 52, 90, 68, 55, 82, 60];
+
 export function ComparePriceChartSkeleton({ columns = 2 }: { columns?: number }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -23,11 +26,11 @@ export function ComparePriceChartSkeleton({ columns = 2 }: { columns?: number })
 
       {/* 차트 영역 */}
       <div className="h-80 flex items-end justify-between gap-1 pt-4">
-        {Array.from({ length: 12 }).map((_, i) => (
+        {CHART_BAR_HEIGHTS.map((height, i) => (
           <Skeleton
             key={i}
             className="flex-1 rounded-t"
-            style={{ height: `${30 + Math.random() * 60}%` }}
+            style={{ height: `${height}%` }}
           />
         ))}
       </div>
