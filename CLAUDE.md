@@ -88,6 +88,29 @@ return fetchApi(`/endpoint?${params}`);
 - `NaverMap`: 지도 렌더링 컴포넌트
 - 반드시 `MapProvider` 하위에서 사용
 
+### Key Components
+
+**공통 컴포넌트 (`components/common/`)**:
+- `ShareButton`: 공유 기능 (URL 복사, 카카오톡, Web Share API)
+- `PriceChange`: 가격 변동 표시 (상승 빨강 ▲, 하락 파랑 ▼)
+- `FavoriteButton`: 관심 단지 즐겨찾기
+- `ErrorBoundary`: 컴포넌트 에러 처리
+
+**검색 컴포넌트 (`components/search/`)**:
+- `AdvancedFilter`: 고급 검색 필터 (준공연도, 세대수, 복도유형)
+- `SearchAutocomplete`: 자동완성 검색창
+- `ApartmentCard`: 검색 결과 카드
+
+**단지 컴포넌트 (`components/apartment/`)**:
+- `SchoolInfo`: 학군 정보 (배정 초등학교 + 가까운 중/고)
+- `AreaFilter`: 평형별 필터
+- `TradeList`: 실거래가 목록 (가격 변동 색상 포함)
+
+**동적 OG 이미지 (`app/apt/[id]/`)**:
+- `opengraph-image.tsx`: 아파트별 공유 미리보기 이미지 (1200x630 PNG)
+- `twitter-image.tsx`: 트위터 카드 이미지 (OG 이미지 재사용)
+- Next.js ImageResponse API 사용
+
 ## Database Schema
 
 ### 테이블 관계도
@@ -242,6 +265,19 @@ GET /apartments/:id/nearest-station # 최근접 지하철역
 GET /apartments/:id/schools     # 학군 정보 (배정 초등학교 + 가까운 중/고)
 GET /apartments/by-bounds       # 지도 영역 내 단지
 ```
+
+### Search API 필터 파라미터
+
+```
+GET /apartments/search?q=강남&yearBuilt=2000s&units=500~1000&hallwayType=계단식
+```
+
+| 파라미터 | 값 | 설명 |
+|---------|-----|------|
+| `q` | string | 검색어 (2글자 이상) |
+| `yearBuilt` | `~1990`, `1990s`, `2000s`, `2010s`, `2020~` | 준공연도 필터 |
+| `units` | `~100`, `100~300`, `300~500`, `500~1000`, `1000~2000`, `2000~` | 세대수 필터 |
+| `hallwayType` | `계단식`, `복도식`, `혼합식` | 복도유형 필터 |
 
 ### API 캐싱 (Cache-Control)
 
