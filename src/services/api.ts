@@ -9,6 +9,7 @@ import type {
   RentTrend,
   AutocompleteItem,
 } from '@/types/apartment';
+import type { ApartmentMapItem } from '@/lib/transformers';
 
 // Next.js Route Handlers 사용 (내부 API)
 const API_URL = '/api';
@@ -105,11 +106,11 @@ export async function getNearestStation(aptId: number): Promise<ApiResponse<Near
   return fetchApi(`/apartments/${aptId}/nearest-station`);
 }
 
-// 지역별 단지 목록 (지도용)
+// 지역별 단지 목록 (지도용, 경량 데이터)
 export async function getApartmentsByBounds(bounds: {
   sw: { lat: number; lng: number };
   ne: { lat: number; lng: number };
-}): Promise<ApiResponse<Apartment[]>> {
+}): Promise<ApiResponse<ApartmentMapItem[]>> {
   const params = new URLSearchParams({
     swLat: String(bounds.sw.lat),
     swLng: String(bounds.sw.lng),

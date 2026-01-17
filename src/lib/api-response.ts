@@ -11,11 +11,41 @@ export interface ApiResponse<T> {
   };
 }
 
+// 캐시 지속 시간 프리셋 (초)
+export const CacheDuration = {
+  NONE: 0,
+  SHORT: 60,           // 1분 - 검색, 자동완성
+  MEDIUM: 300,         // 5분 - 단지 상세, 거래 내역
+  LONG: 3600,          // 1시간 - 가격 추이 (집계 데이터)
+  STATIC: 86400,       // 24시간 - 최근접역 (거의 안 바뀜)
+} as const;
+
+export type CacheDurationValue = typeof CacheDuration[keyof typeof CacheDuration];
+
+interface ResponseOptions<T> {
+  meta?: ApiResponse<T>['meta'];
+  cache?: CacheDurationValue;
+}
+
 export function successResponse<T>(
   data: T,
-  meta?: ApiResponse<T>['meta']
+  options?: ResponseOptions<T> | ApiResponse<T>['meta']
 ): NextResponse<ApiResponse<T>> {
-  return NextResponse.json({ success: true, data, meta });
+  // 하위 호환성: meta만 전달된 경우
+  const opts: ResponseOptions<T> = options && 'total' in options
+    ? { meta: options }
+    : (options as ResponseOptions<T>) || {};
+
+  const headers: HeadersInit = {};
+
+  if (opts.cache && opts.cache > 0) {
+    headers['Cache-Control'] = `public, max-age=${opts.cache}, stale-while-revalidate=${Math.floor(opts.cache / 2)}`;
+  }
+
+  return NextResponse.json(
+    { success: true, data, meta: opts.meta },
+    { headers }
+  );
 }
 
 export function errorResponse(

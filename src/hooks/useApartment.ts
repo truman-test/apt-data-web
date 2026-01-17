@@ -91,7 +91,7 @@ export function useAutocomplete(query: string) {
   return useQuery({
     queryKey: ['autocomplete', query],
     queryFn: () => getAutocomplete(query),
-    enabled: query.length >= 1,
+    enabled: query.length >= 2, // search와 동일하게 2글자 이상
     staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
   });
 }

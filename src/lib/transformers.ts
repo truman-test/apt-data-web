@@ -54,6 +54,40 @@ function transformKaptDetail(detail: raw_kapt_detail | null | undefined): KaptDe
   };
 }
 
+// 지도용 경량 아파트 정보 타입
+export interface ApartmentMapItem {
+  id: number;
+  aptName: string;
+  address: string;
+  lat: number;
+  lng: number;
+  totalUnits: number;
+  constructedYear: number;
+}
+
+// 지도용 경량 변환 (by-bounds API 최적화)
+export function transformApartmentForMap(apt: {
+  apt_id: number;
+  apt_nm: string;
+  sido: string | null;
+  sigungu: string | null;
+  umd_nm: string;
+  lat: unknown;
+  lng: unknown;
+  total_units?: number | null;
+  build_year: number | null;
+}): ApartmentMapItem {
+  return {
+    id: apt.apt_id,
+    aptName: apt.apt_nm,
+    address: [apt.sido, apt.sigungu, apt.umd_nm].filter(Boolean).join(' '),
+    lat: toNumber(apt.lat),
+    lng: toNumber(apt.lng),
+    totalUnits: apt.total_units || 0,
+    constructedYear: apt.build_year || 0,
+  };
+}
+
 // apt_master + raw_kapt_info + raw_kapt_detail -> Apartment 변환
 export function transformApartment(
   apt: apt_master & { kapt_info?: raw_kapt_info | null; kapt_detail?: raw_kapt_detail | null }

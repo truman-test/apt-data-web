@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@/generated/prisma';
-import { successResponse, errorResponse, validateId, validatePagination } from '@/lib/api-response';
+import { successResponse, errorResponse, validateId, validatePagination, CacheDuration } from '@/lib/api-response';
 import { transformTrade, AreaMapping } from '@/lib/transformers';
 
 export async function GET(
@@ -77,7 +77,7 @@ export async function GET(
 
     return successResponse(
       trades.map((t) => transformTrade(t, id, areaMap)),
-      { total, page, limit }
+      { meta: { total, page, limit }, cache: CacheDuration.MEDIUM }
     );
   } catch (error) {
     console.error('Trades API error:', error);

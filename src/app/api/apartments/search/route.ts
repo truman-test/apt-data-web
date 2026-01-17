@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { successResponse, errorResponse, validatePagination } from '@/lib/api-response';
+import { successResponse, errorResponse, validatePagination, CacheDuration } from '@/lib/api-response';
 import { transformApartment } from '@/lib/transformers';
 
 export async function GET(request: NextRequest) {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     return successResponse(
       apartments.map(transformApartment),
-      { total, page, limit }
+      { meta: { total, page, limit }, cache: CacheDuration.SHORT }
     );
   } catch (error) {
     console.error('Search API error:', error);

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
-import { successResponse, errorResponse, validateId } from '@/lib/api-response';
+import { successResponse, errorResponse, validateId, CacheDuration } from '@/lib/api-response';
 
 export interface RentTrend {
   date: string;
@@ -112,7 +112,7 @@ export async function GET(
       transactionCount: Number(t.transaction_count),
     }));
 
-    return successResponse(result);
+    return successResponse(result, { cache: CacheDuration.LONG });
   } catch (error) {
     console.error('Rent trend API error:', error);
     return errorResponse('전월세 시세 추이 조회 중 오류가 발생했습니다', 500);

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { successResponse, errorResponse, validateId } from '@/lib/api-response';
+import { successResponse, errorResponse, validateId, CacheDuration } from '@/lib/api-response';
 import type { AreaType } from '@/types/apartment';
 
 // ㎡를 평으로 변환 (1평 = 3.3 ㎡, 호갱노노 기준 - 내림)
@@ -46,7 +46,7 @@ export async function GET(
     });
 
     if (areaTypes.length === 0) {
-      return successResponse([]);
+      return successResponse([], { cache: CacheDuration.MEDIUM });
     }
 
     // 공급면적 기준 평수로 그룹화
@@ -183,7 +183,7 @@ export async function GET(
       };
     });
 
-    return successResponse(result);
+    return successResponse(result, { cache: CacheDuration.MEDIUM });
   } catch (error) {
     console.error('Area types API error:', error);
     return errorResponse('평형 정보 조회 중 오류가 발생했습니다', 500);

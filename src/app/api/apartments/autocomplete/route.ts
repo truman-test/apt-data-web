@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { successResponse, errorResponse } from '@/lib/api-response';
+import { successResponse, errorResponse, CacheDuration } from '@/lib/api-response';
 
 export interface AutocompleteItem {
   id: number;
@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim() || '';
 
-    // 최소 1글자 이상
-    if (query.length < 1) {
-      return successResponse([]);
+    // 최소 2글자 이상 (search와 동일)
+    if (query.length < 2) {
+      return successResponse([], { cache: CacheDuration.SHORT });
     }
 
     // 검색 결과 조회 (최대 15개, 거래량 순)
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       sigunguName: apt.sigungu || '',
     }));
 
-    return successResponse(result);
+    return successResponse(result, { cache: CacheDuration.SHORT });
   } catch (error) {
     console.error('Autocomplete API error:', error);
     return errorResponse('자동완성 검색 중 오류가 발생했습니다', 500);

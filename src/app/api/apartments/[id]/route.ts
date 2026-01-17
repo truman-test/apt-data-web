@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { successResponse, errorResponse, validateId } from '@/lib/api-response';
+import { successResponse, errorResponse, validateId, CacheDuration } from '@/lib/api-response';
 import { transformApartment } from '@/lib/transformers';
 
 export async function GET(
@@ -28,7 +28,7 @@ export async function GET(
       return errorResponse('아파트를 찾을 수 없습니다', 404);
     }
 
-    return successResponse(transformApartment(apartment));
+    return successResponse(transformApartment(apartment), { cache: CacheDuration.MEDIUM });
   } catch (error) {
     console.error('Apartment detail API error:', error);
     return errorResponse('조회 중 오류가 발생했습니다', 500);

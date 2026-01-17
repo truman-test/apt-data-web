@@ -6,7 +6,7 @@ import { ArrowLeft, X } from 'lucide-react';
 import MapProvider from '@/components/map/MapProvider';
 import NaverMap from '@/components/map/NaverMap';
 import { getApartmentsByBounds } from '@/services/api';
-import type { Apartment } from '@/types/apartment';
+import type { ApartmentMapItem } from '@/lib/transformers';
 
 // 주요 지역 좌표
 const REGIONS = [
@@ -21,9 +21,9 @@ const REGIONS = [
 export default function MapPage() {
   const [map, setMap] = useState<naver.maps.Map | null>(null);
   const [center, setCenter] = useState(REGIONS[0]);
-  const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [apartments, setApartments] = useState<ApartmentMapItem[]>([]);
   const [markers, setMarkers] = useState<naver.maps.Marker[]>([]);
-  const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
+  const [selectedApt, setSelectedApt] = useState<ApartmentMapItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // 지도 영역 내 아파트 조회
