@@ -39,10 +39,10 @@ export function AreaFilter({ areas, selected, onChange, isLoading }: AreaFilterP
       <button
         onClick={() => onChange(null)}
         className={cn(
-          'rounded-xl border-2 p-4 text-left transition-all',
+          'btn-press rounded-xl border-2 p-4 text-left transition-all',
           selected === null
             ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/30'
-            : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
         )}
       >
         <div className="text-lg font-bold text-gray-900 dark:text-white">전체</div>
@@ -61,10 +61,10 @@ export function AreaFilter({ areas, selected, onChange, isLoading }: AreaFilterP
             key={area.id}
             onClick={() => onChange(area.supplyArea)}
             className={cn(
-              'rounded-xl border-2 p-4 text-left transition-all',
+              'btn-press rounded-xl border-2 p-4 text-left transition-all',
               isSelected
                 ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/30'
-                : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
             )}
           >
             {/* 평수 + 세대수 */}

@@ -11,7 +11,7 @@ export function ApartmentCard({ apartment }: ApartmentCardProps) {
   return (
     <Link
       href={`/apt/${apartment.id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700"
+      className="card-hover block rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-700"
     >
       <div className="flex justify-between gap-4">
         <div className="min-w-0 flex-1">

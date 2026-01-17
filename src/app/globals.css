@@ -60,3 +60,140 @@ body {
 .fade-in {
   animation-name: fade-in;
 }
+
+/* ===== Micro Animations ===== */
+
+/* Button press effect */
+.btn-press {
+  transition: transform 150ms ease-out;
+}
+
+.btn-press:active {
+  transform: scale(0.95);
+}
+
+/* Card hover lift effect */
+.card-hover {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* Icon bounce on click */
+@keyframes icon-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.icon-bounce {
+  animation: icon-bounce 300ms ease-out;
+}
+
+/* Heart pop animation */
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.3);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heart-pop {
+  animation: heart-pop 400ms ease-out;
+}
+
+/* Stagger fade in for lists */
+@keyframes stagger-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  animation: stagger-fade-in 300ms ease-out both;
+}
+
+/* Pulse glow for interactive elements */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.pulse-glow:focus {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+/* Skeleton shimmer (enhanced) */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scale in animation */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.scale-in {
+  animation: scale-in 200ms ease-out;
+}
+
+/* Slide up animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slide-up 300ms ease-out;
+}

@@ -72,8 +72,14 @@ export function FavoritesContent() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {favorites.map((aptId) => (
-              <FavoriteApartmentCard key={aptId} aptId={aptId} />
+            {favorites.map((aptId, index) => (
+              <div
+                key={aptId}
+                className="stagger-item"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <FavoriteApartmentCard aptId={aptId} />
+              </div>
             ))}
           </div>
         )}

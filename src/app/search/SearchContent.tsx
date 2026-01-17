@@ -131,8 +131,14 @@ function SearchContentInner() {
             {apartments.length > 0 && (
               <>
                 <div className="grid gap-4 md:grid-cols-2">
-                  {apartments.map((apt) => (
-                    <ApartmentCard key={apt.id} apartment={apt} />
+                  {apartments.map((apt, index) => (
+                    <div
+                      key={apt.id}
+                      className="stagger-item"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <ApartmentCard apartment={apt} />
+                    </div>
                   ))}
                 </div>
 
