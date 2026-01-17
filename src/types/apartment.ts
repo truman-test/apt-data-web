@@ -214,3 +214,10 @@ export interface AutocompleteItem {
   sidoName: string;
   sigunguName: string;
 }
+
+// 검색 필터 옵션
+export interface SearchFilters {
+  yearBuilt?: '~1990' | '1990s' | '2000s' | '2010s' | '2020~';
+  units?: '~100' | '100~300' | '300~500' | '500~1000' | '1000~2000' | '2000~';
+  hallwayType?: '계단식' | '복도식' | '혼합식';
+}

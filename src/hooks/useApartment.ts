@@ -88,7 +88,12 @@ export function useSchools(aptId: number) {
   });
 }
 
-export function useSearchApartments(query: string, options?: { page?: number; limit?: number }) {
+import type { SearchFilters } from '@/types/apartment';
+
+export function useSearchApartments(
+  query: string,
+  options?: { page?: number; limit?: number; filters?: SearchFilters }
+) {
   return useQuery({
     queryKey: ['searchApartments', query, options],
     queryFn: () => searchApartments(query, options),

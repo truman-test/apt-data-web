@@ -5,6 +5,7 @@ import type {
   Rent,
   NearestStation,
   SchoolInfo,
+  SearchFilters,
   ApiResponse,
   PriceTrend,
   RentTrend,
@@ -34,13 +35,17 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
 // 단지 검색
 export async function searchApartments(
   query: string,
-  options?: { page?: number; limit?: number }
+  options?: { page?: number; limit?: number; filters?: SearchFilters }
 ): Promise<ApiResponse<Apartment[]>> {
   const params = new URLSearchParams({
     q: query,
     page: String(options?.page || 1),
     limit: String(options?.limit || 20),
   });
+  // 필터 추가
+  if (options?.filters?.yearBuilt) params.append('yearBuilt', options.filters.yearBuilt);
+  if (options?.filters?.units) params.append('units', options.filters.units);
+  if (options?.filters?.hallwayType) params.append('hallwayType', options.filters.hallwayType);
   return fetchApi(`/apartments/search?${params}`);
 }
 

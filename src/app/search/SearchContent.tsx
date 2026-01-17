@@ -1,44 +1,89 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { ArrowLeft, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchApartments } from '@/hooks/useApartment';
 import { ApartmentCard } from '@/components/search/ApartmentCard';
 import { Pagination } from '@/components/search/Pagination';
 import { SearchAutocomplete } from '@/components/search/SearchAutocomplete';
+import { AdvancedFilter } from '@/components/search/AdvancedFilter';
 import { ApartmentCardSkeleton } from '@/components/skeleton';
+import type { SearchFilters } from '@/types/apartment';
+
+// URL에서 필터 파싱
+function parseFiltersFromUrl(searchParams: URLSearchParams): SearchFilters {
+  return {
+    yearBuilt: searchParams.get('yearBuilt') as SearchFilters['yearBuilt'] || undefined,
+    units: searchParams.get('units') as SearchFilters['units'] || undefined,
+    hallwayType: searchParams.get('hallwayType') as SearchFilters['hallwayType'] || undefined,
+  };
+}
+
+// 필터를 URL 파라미터로 변환
+function filtersToUrlParams(filters: SearchFilters): string {
+  const params = new URLSearchParams();
+  if (filters.yearBuilt) params.set('yearBuilt', filters.yearBuilt);
+  if (filters.units) params.set('units', filters.units);
+  if (filters.hallwayType) params.set('hallwayType', filters.hallwayType);
+  return params.toString();
+}
 
 function SearchContentInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQuery = searchParams.get('q') || '';
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
+  const initialFilters = parseFiltersFromUrl(searchParams);
 
   const [query, setQuery] = useState(initialQuery);
   const [page, setPage] = useState(initialPage);
+  const [filters, setFilters] = useState<SearchFilters>(initialFilters);
 
-  const { data, isLoading, isError } = useSearchApartments(query, { page, limit: 20 });
+  const { data, isLoading, isError } = useSearchApartments(query, { page, limit: 20, filters });
 
   // URL 파라미터 변경 시 상태 동기화 (뒤로가기/앞으로가기 지원)
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setQuery(initialQuery);
     setPage(initialPage);
-  }, [initialQuery, initialPage]);
+    setFilters(initialFilters);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery, initialPage, searchParams.toString()]);
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  // URL 업데이트 헬퍼
+  const updateUrl = useCallback((newQuery: string, newPage: number, newFilters: SearchFilters) => {
+    const params = new URLSearchParams();
+    params.set('q', newQuery);
+    if (newPage > 1) params.set('page', String(newPage));
+    const filterParams = filtersToUrlParams(newFilters);
+    if (filterParams) {
+      filterParams.split('&').forEach(param => {
+        const [key, value] = param.split('=');
+        params.set(key, value);
+      });
+    }
+    router.push(`/search?${params.toString()}`);
+  }, [router]);
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
     setPage(1);
-    router.push(`/search?q=${encodeURIComponent(newQuery)}`);
+    updateUrl(newQuery, 1, filters);
   };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    router.push(`/search?q=${encodeURIComponent(query)}&page=${newPage}`);
+    updateUrl(query, newPage, filters);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFilterChange = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
+    setPage(1); // 필터 변경 시 첫 페이지로
+    updateUrl(query, 1, newFilters);
   };
 
   const apartments = data?.data || [];
@@ -108,6 +153,13 @@ function SearchContentInner() {
           </div>
         )}
 
+        {/* 상세 필터 - 검색어가 있을 때만 표시 */}
+        {query && (
+          <div className="mb-4">
+            <AdvancedFilter filters={filters} onChange={handleFilterChange} />
+          </div>
+        )}
+
         {/* 검색 결과 */}
         {query && !isLoading && !isError && (
           <>
@@ -123,7 +175,11 @@ function SearchContentInner() {
             {apartments.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <p className="text-gray-500 dark:text-gray-400">검색 결과가 없습니다</p>
-                <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">다른 검색어로 시도해보세요</p>
+                <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
+                  {Object.values(filters).some(Boolean)
+                    ? '필터 조건을 변경해보세요'
+                    : '다른 검색어로 시도해보세요'}
+                </p>
               </div>
             )}
 
