@@ -13,6 +13,7 @@ import { RentList } from '@/components/apartment/RentList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
 import { AreaFilter } from '@/components/apartment/AreaFilter';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
+import { ErrorBoundary, ChartErrorFallback } from '@/components/common/ErrorBoundary';
 import {
   ApartmentInfoSkeleton,
   NearbyInfoSkeleton,
@@ -145,26 +146,39 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
               />
             </div>
 
-            <PriceChart
-              data={priceTrend}
-              isLoading={trendLoading}
-              aptId={aptId}
-              selectedArea={selectedExclusiveArea}
-            />
-            <RentChart
-              aptId={aptId}
-              selectedArea={selectedExclusiveArea}
-            />
-            <TradeList
-              trades={trades}
-              isLoading={tradesLoading}
-              total={tradesData?.meta?.total || 0}
-            />
-            <RentList
-              rents={rents}
-              isLoading={rentsLoading}
-              total={rentsData?.meta?.total || 0}
-            />
+            {/* 시세 차트 - 에러 바운더리로 감싸서 차트 에러가 전체 페이지를 중단시키지 않도록 */}
+            <ErrorBoundary fallback={<ChartErrorFallback />}>
+              <PriceChart
+                data={priceTrend}
+                isLoading={trendLoading}
+                aptId={aptId}
+                selectedArea={selectedExclusiveArea}
+              />
+            </ErrorBoundary>
+
+            <ErrorBoundary fallback={<ChartErrorFallback />}>
+              <RentChart
+                aptId={aptId}
+                selectedArea={selectedExclusiveArea}
+              />
+            </ErrorBoundary>
+
+            {/* 거래 내역 */}
+            <ErrorBoundary>
+              <TradeList
+                trades={trades}
+                isLoading={tradesLoading}
+                total={tradesData?.meta?.total || 0}
+              />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <RentList
+                rents={rents}
+                isLoading={rentsLoading}
+                total={rentsData?.meta?.total || 0}
+              />
+            </ErrorBoundary>
           </div>
         </div>
       </main>
