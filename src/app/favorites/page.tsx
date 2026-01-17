@@ -7,7 +7,6 @@ import { useFavoriteStore } from '@/stores/favoriteStore';
 import { useApartment } from '@/hooks/useApartment';
 import { ApartmentCard } from '@/components/search/ApartmentCard';
 import { ApartmentCardSkeleton } from '@/components/skeleton';
-import type { Apartment } from '@/types/apartment';
 
 function FavoriteApartmentCard({ aptId }: { aptId: number }) {
   const { data, isLoading, isError } = useApartment(aptId);
@@ -28,10 +27,9 @@ export default function FavoritesPage() {
   const [mounted, setMounted] = useState(false);
   const favorites = useFavoriteStore((state) => state.favorites);
 
-  // Hydration mismatch 방지
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Hydration mismatch 방지 (SSR에서 localStorage 접근 불가)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setMounted(true), []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">

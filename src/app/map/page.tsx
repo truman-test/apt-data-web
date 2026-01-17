@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, X } from 'lucide-react';
 import MapProvider from '@/components/map/MapProvider';
@@ -22,7 +22,7 @@ export default function MapPage() {
   const [map, setMap] = useState<naver.maps.Map | null>(null);
   const [center, setCenter] = useState(REGIONS[0]);
   const [apartments, setApartments] = useState<ApartmentMapItem[]>([]);
-  const [markers, setMarkers] = useState<naver.maps.Marker[]>([]);
+  const markersRef = useRef<naver.maps.Marker[]>([]);
   const [selectedApt, setSelectedApt] = useState<ApartmentMapItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,7 +51,7 @@ export default function MapPage() {
     if (!map || !window.naver) return;
 
     // 기존 마커 제거
-    markers.forEach((marker) => marker.setMap(null));
+    markersRef.current.forEach((marker) => marker.setMap(null));
 
     // 새 마커 생성
     const newMarkers = apartments
@@ -72,7 +72,7 @@ export default function MapPage() {
         return marker;
       });
 
-    setMarkers(newMarkers);
+    markersRef.current = newMarkers;
 
     return () => {
       newMarkers.forEach((marker) => marker.setMap(null));

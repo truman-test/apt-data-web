@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, X, Search } from 'lucide-react';
-import { useApartment, usePriceTrend, useNearestStation, useSearchApartments } from '@/hooks/useApartment';
+import { useQueries } from '@tanstack/react-query';
+import { useApartment, useSearchApartments } from '@/hooks/useApartment';
+import { getApartment, getPriceTrend, getNearestStation } from '@/services/api';
 import { CompareTable } from '@/components/compare/CompareTable';
 import { ComparePriceChart } from '@/components/compare/ComparePriceChart';
 import { Skeleton, CompareTableSkeleton, ComparePriceChartSkeleton } from '@/components/skeleton';
@@ -147,10 +149,30 @@ function ApartmentSlotWithData({
 
 // 비교 콘텐츠 컴포넌트
 function CompareContent({ apartmentIds }: { apartmentIds: number[] }) {
-  // 각 아파트 데이터 조회
-  const apartmentQueries = apartmentIds.map((id) => useApartment(id));
-  const trendQueries = apartmentIds.map((id) => usePriceTrend(id, { period: '3y' }));
-  const stationQueries = apartmentIds.map((id) => useNearestStation(id));
+  // useQueries로 동적 배열 쿼리 처리 (Hooks 규칙 준수)
+  const apartmentQueries = useQueries({
+    queries: apartmentIds.map((id) => ({
+      queryKey: ['apartment', id],
+      queryFn: () => getApartment(id),
+      enabled: !!id,
+    })),
+  });
+
+  const trendQueries = useQueries({
+    queries: apartmentIds.map((id) => ({
+      queryKey: ['priceTrend', id, { period: '3y' }],
+      queryFn: () => getPriceTrend(id, { period: '3y' }),
+      enabled: !!id,
+    })),
+  });
+
+  const stationQueries = useQueries({
+    queries: apartmentIds.map((id) => ({
+      queryKey: ['nearestStation', id],
+      queryFn: () => getNearestStation(id),
+      enabled: !!id,
+    })),
+  });
 
   const isLoading =
     apartmentQueries.some((q) => q.isLoading) ||
@@ -211,17 +233,16 @@ function ComparePageSkeleton() {
 function ComparePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [apartmentIds, setApartmentIds] = useState<number[]>([]);
   const [showSearch, setShowSearch] = useState(false);
   const addToast = useToastStore((state) => state.addToast);
 
-  // URL에서 ID 파싱
-  useEffect(() => {
+  // URL에서 ID 파싱 (useMemo로 파생 상태 계산)
+  const apartmentIds = useMemo(() => {
     const idsParam = searchParams.get('ids');
     if (idsParam) {
-      const ids = idsParam.split(',').map(Number).filter(Boolean);
-      setApartmentIds(ids.slice(0, MAX_COMPARE));
+      return idsParam.split(',').map(Number).filter(Boolean).slice(0, MAX_COMPARE);
     }
+    return [];
   }, [searchParams]);
 
   // URL 업데이트
@@ -244,7 +265,6 @@ function ComparePageContent() {
       return;
     }
     const newIds = [...apartmentIds, apt.id];
-    setApartmentIds(newIds);
     updateUrl(newIds);
     addToast(`${apt.aptName}이(가) 비교 목록에 추가되었습니다`, 'success');
   };
@@ -252,7 +272,6 @@ function ComparePageContent() {
   // 아파트 제거
   const removeApartment = (id: number) => {
     const newIds = apartmentIds.filter((aptId) => aptId !== id);
-    setApartmentIds(newIds);
     updateUrl(newIds);
     addToast('아파트가 비교 목록에서 제거되었습니다', 'info');
   };

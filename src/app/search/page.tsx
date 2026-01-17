@@ -21,11 +21,13 @@ function SearchContent() {
 
   const { data, isLoading, isError } = useSearchApartments(query, { page, limit: 20 });
 
-  // URL 파라미터 변경 시 상태 동기화
+  // URL 파라미터 변경 시 상태 동기화 (뒤로가기/앞으로가기 지원)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setQuery(initialQuery);
     setPage(initialPage);
   }, [initialQuery, initialPage]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
