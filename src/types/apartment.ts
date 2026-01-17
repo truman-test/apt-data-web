@@ -143,13 +143,23 @@ export interface NearestStation {
   walkingMinutes: number; // 도보 시간
 }
 
-// 최근접 학교
-export interface NearestSchool {
-  aptId: number;
+// 학교 정보
+export interface SchoolItem {
   schoolName: string;
   schoolType: 'elementary' | 'middle' | 'high';
-  distance: number;
-  walkingMinutes: number;
+  schoolKind?: string; // 공립/사립
+  distance: number; // 미터
+  walkingMinutes: number; // 도보 시간
+  studentCount?: number;
+  isAssigned?: boolean; // 배정 학교 여부
+}
+
+// 학군 정보 (배정 + 주변)
+export interface SchoolInfo {
+  assignedElementary?: SchoolItem; // 배정 초등학교
+  middleZoneName?: string; // 중학군명
+  nearbyMiddle: SchoolItem[]; // 가까운 중학교
+  nearbyHigh: SchoolItem[]; // 가까운 고등학교
 }
 
 // API 응답 타입

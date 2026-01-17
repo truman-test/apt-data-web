@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { useApartment, useNearestStation, usePriceTrend, useTrades, useRents, useAreaTypes } from '@/hooks/useApartment';
+import { useApartment, useNearestStation, useSchools, usePriceTrend, useTrades, useRents, useAreaTypes } from '@/hooks/useApartment';
 import { ApartmentInfo } from '@/components/apartment/ApartmentInfo';
 import { FacilityInfo } from '@/components/apartment/FacilityInfo';
 import { PriceChart } from '@/components/chart/PriceChart';
@@ -11,12 +11,14 @@ import { RentChart } from '@/components/chart/RentChart';
 import { TradeList } from '@/components/apartment/TradeList';
 import { RentList } from '@/components/apartment/RentList';
 import { NearbyInfo } from '@/components/apartment/NearbyInfo';
+import { SchoolInfo } from '@/components/apartment/SchoolInfo';
 import { AreaFilter } from '@/components/apartment/AreaFilter';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
 import { ErrorBoundary, ChartErrorFallback } from '@/components/common/ErrorBoundary';
 import {
   ApartmentInfoSkeleton,
   NearbyInfoSkeleton,
+  SchoolInfoSkeleton,
   PriceChartSkeleton,
   TradeListSkeleton,
   Skeleton,
@@ -32,6 +34,7 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
 
   const { data: aptData, isLoading: aptLoading, isError: aptError } = useApartment(aptId);
   const { data: stationData } = useNearestStation(aptId);
+  const { data: schoolsData } = useSchools(aptId);
   const { data: areaTypesData, isLoading: areaTypesLoading } = useAreaTypes(aptId);
 
   const areaTypes = areaTypesData?.data || [];
@@ -55,6 +58,7 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
 
   const apartment = aptData?.data;
   const station = stationData?.data;
+  const schools = schoolsData?.data;
   const priceTrend = trendData?.data || [];
   const trades = tradesData?.data || [];
   const rents = rentsData?.data || [];
@@ -80,6 +84,7 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
             <div className="space-y-6 lg:col-span-1">
               <ApartmentInfoSkeleton />
               <NearbyInfoSkeleton />
+              <SchoolInfoSkeleton />
             </div>
             <div className="space-y-6 lg:col-span-2">
               <PriceChartSkeleton />
@@ -131,6 +136,7 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
             <ApartmentInfo apartment={apartment} />
             <FacilityInfo apartment={apartment} />
             <NearbyInfo station={station} />
+            <SchoolInfo schoolInfo={schools} />
           </div>
 
           {/* 오른쪽: 평형 필터 + 시세 차트 + 거래 내역 */}

@@ -124,9 +124,10 @@ raw_building_ledger_full (80M) ◄── 건축물대장 원본
 | `raw_kapt_info` | 21,928 | K-apt 기본정보 | kapt_code(PK), total_dong_cnt, total_ho_cnt, hallway_type |
 | `raw_kapt_detail` | 21,955 | K-apt 상세정보 | kapt_code(PK), kaptd_ecnt(승강기), kaptd_pcnt(주차), welfare_facility |
 | `raw_stations` | 1,090 | 지하철역 정보 | station_name, line_name, lat, lng |
-| `raw_schools` | 12,610 | 학교 정보 | school_name, school_type, lat, lng, student_count |
+| `raw_schools` | 12,610 | 학교 정보 | school_name, school_type, school_kind, lat, lng |
 | `regions` | 252 | 시군구 코드 | code(PK), sido, sigungu |
 | `apt_nearest_station` | 43,826 | 최근접 지하철역 | apt_id(FK), station_id, distance_m |
+| `apt_assigned_school` | 47,882 | 배정 학교 정보 | apt_id(FK), elementary_school_name, middle_zone_name |
 | `area_supply_mapping` | 433K | 전용/공급 면적 매핑 | sigungu_cd, bjdong_cd, bun, ji, exclu_area, supply_area |
 
 ### 테이블 연결 키
@@ -138,6 +139,8 @@ raw_building_ledger_full (80M) ◄── 건축물대장 원본
 | apt_master ↔ raw_kapt_* | `kapt_code` |
 | apt_master ↔ raw_trades/rents | `sigungu_cd + apt_nm + build_year` |
 | apt_master ↔ apt_nearest_station | `apt_id` |
+| apt_master ↔ apt_assigned_school | `apt_id` |
+| apt_assigned_school ↔ raw_schools | `elementary_school_name || '등학교' = school_name` |
 
 ### 데이터 단위
 - **가격**: 만원 (`deal_amount`, `deposit`, `monthly_rent`)
@@ -236,6 +239,7 @@ GET /apartments/:id/rents       # 전월세 실거래가
 GET /apartments/:id/price-trend # 가격 추이
 GET /apartments/:id/rent-trend  # 전월세 추이
 GET /apartments/:id/nearest-station # 최근접 지하철역
+GET /apartments/:id/schools     # 학군 정보 (배정 초등학교 + 가까운 중/고)
 GET /apartments/by-bounds       # 지도 영역 내 단지
 ```
 
@@ -246,7 +250,7 @@ GET /apartments/by-bounds       # 지도 영역 내 단지
 | search, autocomplete, by-bounds | 1분 | 자주 변경되는 검색 |
 | 단지 상세, trades, rents, area-types | 5분 | 단지별 데이터 |
 | price-trend, rent-trend | 1시간 | 집계 데이터 |
-| nearest-station | 24시간 | 정적 데이터 |
+| nearest-station, schools | 24시간 | 정적 데이터 |
 
 ```typescript
 // lib/api-response.ts

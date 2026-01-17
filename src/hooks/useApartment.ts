@@ -7,6 +7,7 @@ import {
   getPriceTrend,
   getRentTrend,
   getNearestStation,
+  getSchools,
   searchApartments,
   getAutocomplete,
 } from '@/services/api';
@@ -75,6 +76,14 @@ export function useNearestStation(aptId: number) {
   return useQuery({
     queryKey: ['nearestStation', aptId],
     queryFn: () => getNearestStation(aptId),
+    enabled: !!aptId,
+  });
+}
+
+export function useSchools(aptId: number) {
+  return useQuery({
+    queryKey: ['schools', aptId],
+    queryFn: () => getSchools(aptId),
     enabled: !!aptId,
   });
 }

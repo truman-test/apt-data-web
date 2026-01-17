@@ -238,12 +238,28 @@ model raw_schools {
   school_code String   @unique(map: "uq_schools_code") @db.VarChar(20)
   school_name String   @db.VarChar(100)
   school_type String?  @db.VarChar(20)
+  school_kind String?  @db.VarChar(20)
   sigungu_cd  String?  @db.VarChar(5)
   address     String?
   lat         Decimal? @db.Decimal(10, 7)
   lng         Decimal? @db.Decimal(10, 7)
+  student_count Int?
+  class_count   Int?
+  teacher_count Int?
 
   @@index([lat, lng], map: "idx_schools_coordinates")
   @@index([sigungu_cd], map: "idx_schools_sigungu")
   @@index([school_type], map: "idx_schools_type")
+}
+
+// 배정 학교 정보 (47,882건)
+model apt_assigned_school {
+  apt_id                 Int       @id
+  elementary_zone_id     String?   @db.VarChar(20)
+  elementary_school_name String?   @db.VarChar(100)
+  middle_zone_id         String?   @db.VarChar(20)
+  middle_zone_name       String?   @db.VarChar(100)
+  created_at             DateTime? @default(now())
+
+  @@index([apt_id], map: "idx_apt_assigned_school_apt")
 }

@@ -4,6 +4,7 @@ import type {
   Trade,
   Rent,
   NearestStation,
+  SchoolInfo,
   ApiResponse,
   PriceTrend,
   RentTrend,
@@ -104,6 +105,11 @@ export async function getRentTrend(
 // 최근접 지하철역
 export async function getNearestStation(aptId: number): Promise<ApiResponse<NearestStation>> {
   return fetchApi(`/apartments/${aptId}/nearest-station`);
+}
+
+// 학군 정보 (배정 + 주변 학교)
+export async function getSchools(aptId: number): Promise<ApiResponse<SchoolInfo>> {
+  return fetchApi(`/apartments/${aptId}/schools`);
 }
 
 // 지역별 단지 목록 (지도용, 경량 데이터)
