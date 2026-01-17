@@ -11,9 +11,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev      # 개발 서버 (localhost:3000)
-npm run build    # 프로덕션 빌드
-npm run lint     # ESLint 실행
+npm run dev       # 개발 서버 (localhost:3000)
+npm run build     # 프로덕션 빌드
+npm run lint      # ESLint 실행
+npm run test:e2e  # Playwright E2E 테스트
 ```
 
 ## Architecture
@@ -33,7 +34,11 @@ src/
 ├── app/
 │   ├── api/          # Backend API Route Handlers (읽기 전용)
 │   └── ...           # 페이지 라우트
-├── lib/              # DB 클라이언트, 유틸리티
+├── lib/
+│   ├── prisma.ts     # Prisma 클라이언트
+│   ├── api-response.ts   # API 응답 헬퍼 + HTTP 캐싱
+│   ├── formatters.ts     # 가격/면적 포맷팅 함수
+│   └── transformers.ts   # DB → API 응답 변환
 ├── components/
 │   ├── common/       # QueryProvider 등 공통 컴포넌트
 │   ├── map/          # NaverMap, MapProvider
@@ -44,6 +49,7 @@ src/
 ├── services/         # API 클라이언트 (api.ts)
 ├── stores/           # Zustand 스토어
 └── types/            # TypeScript 타입 정의
+e2e/                  # Playwright E2E 테스트
 ```
 
 ### Data Flow
@@ -82,6 +88,124 @@ return fetchApi(`/endpoint?${params}`);
 - `NaverMap`: 지도 렌더링 컴포넌트
 - 반드시 `MapProvider` 하위에서 사용
 
+## Database Schema
+
+### 테이블 관계도
+```
+regions ◄─── apt_master ───► apt_area_types
+  (252)      (48,213)         (467,522)
+                │
+                ├───► apt_nearest_station (43,826)
+                │           │
+                │           ▼
+                │      raw_stations (1,090)
+                │
+                ├───► raw_kapt_info (21,928)
+                │
+                ├───► raw_kapt_detail (21,955)
+                │
+                └───► raw_trades (10.5M) / raw_rents (12M)
+                            │
+                            ▼
+                    area_supply_mapping (433K)
+
+raw_schools (12,610) ◄── 좌표 기반 연결
+raw_building_ledger_full (80M) ◄── 건축물대장 원본
+```
+
+### 주요 테이블
+
+| 테이블 | 건수 | 설명 | 주요 컬럼 |
+|--------|-----:|------|-----------|
+| `apt_master` | 48,213 | 아파트 단지 마스터 | apt_id(PK), sigungu_cd, apt_nm, kapt_code, lat, lng |
+| `raw_trades` | 10.5M | 매매 실거래가 | sigungu_cd, apt_nm, exclu_use_ar, deal_year/month/day, deal_amount, floor |
+| `raw_rents` | 12M | 전월세 실거래가 | sigungu_cd, apt_nm, exclu_use_ar, deal_year/month/day, deposit, monthly_rent |
+| `apt_area_types` | 467K | 단지별 면적 타입 | apt_id(FK), exclu_area, supply_area, unit_count |
+| `raw_kapt_info` | 21,928 | K-apt 기본정보 | kapt_code(PK), total_dong_cnt, total_ho_cnt, hallway_type |
+| `raw_kapt_detail` | 21,955 | K-apt 상세정보 | kapt_code(PK), kaptd_ecnt(승강기), kaptd_pcnt(주차), welfare_facility |
+| `raw_stations` | 1,090 | 지하철역 정보 | station_name, line_name, lat, lng |
+| `raw_schools` | 12,610 | 학교 정보 | school_name, school_type, lat, lng, student_count |
+| `regions` | 252 | 시군구 코드 | code(PK), sido, sigungu |
+| `apt_nearest_station` | 43,826 | 최근접 지하철역 | apt_id(FK), station_id, distance_m |
+| `area_supply_mapping` | 433K | 전용/공급 면적 매핑 | sigungu_cd, bjdong_cd, bun, ji, exclu_area, supply_area |
+
+### 테이블 연결 키
+
+| 관계 | 연결 방법 |
+|------|-----------|
+| apt_master ↔ regions | `sigungu_cd = code` |
+| apt_master ↔ apt_area_types | `apt_id` |
+| apt_master ↔ raw_kapt_* | `kapt_code` |
+| apt_master ↔ raw_trades/rents | `sigungu_cd + apt_nm + build_year` |
+| apt_master ↔ apt_nearest_station | `apt_id` |
+
+### 데이터 단위
+- **가격**: 만원 (`deal_amount`, `deposit`, `monthly_rent`)
+- **면적**: ㎡ (`exclu_use_ar`, `exclu_area`, `supply_area`)
+- **거리**: 미터 (`distance_m`)
+- **전용률**: 백분율 (`exclu_ratio` = 74.5 → 74.5%)
+
+### 주요 인덱스
+
+| 테이블 | 인덱스 | 용도 |
+|--------|--------|------|
+| apt_master | `idx_apt_master_search(search_name)` | 단지 검색 |
+| apt_master | `idx_apt_master_coordinates(lat, lng)` | 지도 영역 조회 |
+| apt_master | `idx_apt_master_sigungu(sigungu_cd)` | 지역 필터 |
+| raw_trades | `idx_raw_trades_deal_ym(deal_year, deal_month)` | 기간 조회 |
+| raw_trades | `idx_raw_trades_apt_nm(apt_nm)` | 단지명 검색 |
+| raw_rents | `idx_raw_rents_deal_ym(deal_year, deal_month)` | 기간 조회 |
+
+### 자주 사용하는 쿼리 패턴
+
+```sql
+-- 단지 상세 + K-apt 정보
+SELECT a.*, k.total_dong_cnt, k.total_ho_cnt, d.kaptd_ecnt, d.kaptd_pcnt
+FROM apt_master a
+LEFT JOIN raw_kapt_info k ON a.kapt_code = k.kapt_code
+LEFT JOIN raw_kapt_detail d ON a.kapt_code = d.kapt_code
+WHERE a.apt_id = ?;
+
+-- 단지별 실거래가 조회
+SELECT * FROM raw_trades
+WHERE sigungu_cd = ? AND apt_nm = ? AND build_year = ?
+ORDER BY deal_year DESC, deal_month DESC, deal_day DESC;
+
+-- 면적 타입별 조회
+SELECT exclu_area, supply_area, unit_count
+FROM apt_area_types WHERE apt_id = ?
+ORDER BY exclu_area;
+
+-- 지도 영역 내 단지 조회
+SELECT * FROM apt_master
+WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?
+  AND lat IS NOT NULL AND lng IS NOT NULL;
+
+-- 최근접 지하철역
+SELECT n.*, s.line_name
+FROM apt_nearest_station n
+JOIN raw_stations s ON n.station_id = s.id
+WHERE n.apt_id = ?;
+```
+
+### 실거래가 데이터 참고사항
+
+| 컬럼 | 값 | 의미 |
+|------|-----|------|
+| `cdeal_type` | NULL/빈값 | 정상 거래 |
+| `cdeal_type` | 'O' | 해제된 거래 (필터링 필요) |
+| `monthly_rent` | 0 | 전세 |
+| `monthly_rent` | > 0 | 월세 |
+| `contract_type` | '신규' | 신규 계약 |
+| `contract_type` | '갱신' | 계약 갱신 |
+| `use_rr_right` | 'Y' | 갱신요구권 사용 |
+
+### NULL 허용 주요 컬럼
+- `apt_master.kapt_code`: K-apt 미매칭 단지 존재 (~45%)
+- `apt_master.lat/lng`: 좌표 없는 단지 존재
+- `raw_trades.deal_day`: 일자 미공개 거래
+- `raw_trades.floor`: 층 정보 없음
+
 ## Environment Variables
 
 ```
@@ -104,11 +228,34 @@ DATABASE_URL                     # PostgreSQL 연결 문자열
 
 ```
 GET /apartments/search?q=       # 단지 검색
+GET /apartments/autocomplete?q= # 자동완성 (2글자 이상)
 GET /apartments/:id             # 단지 상세
+GET /apartments/:id/area-types  # 평형 타입별 정보
 GET /apartments/:id/trades      # 매매 실거래가
 GET /apartments/:id/rents       # 전월세 실거래가
 GET /apartments/:id/price-trend # 가격 추이
+GET /apartments/:id/rent-trend  # 전월세 추이
+GET /apartments/:id/nearest-station # 최근접 지하철역
 GET /apartments/by-bounds       # 지도 영역 내 단지
+```
+
+### API 캐싱 (Cache-Control)
+
+| 엔드포인트 | TTL | 용도 |
+|-----------|-----|------|
+| search, autocomplete, by-bounds | 1분 | 자주 변경되는 검색 |
+| 단지 상세, trades, rents, area-types | 5분 | 단지별 데이터 |
+| price-trend, rent-trend | 1시간 | 집계 데이터 |
+| nearest-station | 24시간 | 정적 데이터 |
+
+```typescript
+// lib/api-response.ts
+export const CacheDuration = {
+  SHORT: 60,      // 1분
+  MEDIUM: 300,    // 5분
+  LONG: 3600,     // 1시간
+  STATIC: 86400,  // 24시간
+};
 ```
 
 ## Critical Constraints (중요 제약사항)
