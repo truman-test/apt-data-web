@@ -9,6 +9,7 @@ import { ApartmentCard } from '@/components/search/ApartmentCard';
 import { Pagination } from '@/components/search/Pagination';
 import { SearchAutocomplete } from '@/components/search/SearchAutocomplete';
 import { AdvancedFilter } from '@/components/search/AdvancedFilter';
+import { ShareButton } from '@/components/common/ShareButton';
 import { ApartmentCardSkeleton } from '@/components/skeleton';
 import type { SearchFilters } from '@/types/apartment';
 
@@ -169,6 +170,13 @@ function SearchContentInner() {
                 <span className="font-semibold text-gray-900 dark:text-white">&quot;{query}&quot;</span> 검색 결과{' '}
                 <span className="font-semibold text-blue-600 dark:text-blue-400">{total.toLocaleString()}</span>건
               </p>
+              {apartments.length > 0 && (
+                <ShareButton
+                  title={`"${query}" 아파트 검색 결과`}
+                  description={`${total.toLocaleString()}건의 검색 결과`}
+                  size="sm"
+                />
+              )}
             </div>
 
             {/* 결과 없음 */}

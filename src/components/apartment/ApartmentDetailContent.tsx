@@ -14,6 +14,7 @@ import { NearbyInfo } from '@/components/apartment/NearbyInfo';
 import { SchoolInfo } from '@/components/apartment/SchoolInfo';
 import { AreaFilter } from '@/components/apartment/AreaFilter';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
+import { ShareButton } from '@/components/common/ShareButton';
 import { ErrorBoundary, ChartErrorFallback } from '@/components/common/ErrorBoundary';
 import {
   ApartmentInfoSkeleton,
@@ -120,6 +121,11 @@ export function ApartmentDetailContent({ aptId }: ApartmentDetailContentProps) {
             <h1 className="truncate text-lg font-semibold text-gray-900 dark:text-white">{apartment.aptName}</h1>
             <p className="truncate text-sm text-gray-500 dark:text-gray-400">{apartment.address}</p>
           </div>
+          <ShareButton
+            title={`${apartment.aptName} - 실거래가`}
+            description={`${apartment.address} 아파트 실거래가 및 시세 정보`}
+            size="lg"
+          />
           <FavoriteButton
             aptId={aptId}
             aptName={apartment.aptName}
